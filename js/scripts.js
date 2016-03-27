@@ -11,18 +11,14 @@ var radius = 10;
 function draw(){
 	if(x < 10){
 		xSpeed = Math.floor(Math.random() * 6);
-		console.log(xSpeed);
 	}
 	else if(x > 790){
 		xSpeed = -(Math.floor(Math.random() * 6));
-		console.log(xSpeed);
 	}else if(y < 10){
 		ySpeed = Math.floor(Math.random() * 6);
-		console.log(ySpeed);
 	}
 	else if(y > 590){
 		ySpeed = -(Math.floor(Math.random() * 6));
-		console.log(ySpeed);
 	}
 	context.clearRect(0,0, 800,600);
 	context.beginPath();
@@ -31,9 +27,8 @@ function draw(){
 	x += xSpeed;
 	y += ySpeed;
 }
-
 var ballInt = setInterval(draw, 15);
-console.log(x);
+
 	
 
 
