@@ -2,20 +2,34 @@
 var canvas = document.getElementById("the-canvas");
 var context = canvas.getContext("2d");
 
-var x=150;
-var y = 150;
+var x=400;
+var xSpeed = 5;
+var ySpeed = 5;
+var y = 300;
 var radius = 10;
-var endArc = 0
 
 function draw(){
+	if(x < 10){
+		xSpeed = Math.floor(Math.random() * 6);
+		console.log(xSpeed);
+	}
+	else if(x > 790){
+		xSpeed = -(Math.floor(Math.random() * 6));
+		console.log(xSpeed);
+	}else if(y < 10){
+		ySpeed = Math.floor(Math.random() * 6);
+		console.log(ySpeed);
+	}
+	else if(y > 590){
+		ySpeed = -(Math.floor(Math.random() * 6));
+		console.log(ySpeed);
+	}
 	context.clearRect(0,0, 800,600);
 	context.beginPath();
-	context.arc(x, y, radius, 0, Math.PI*endArc);
+	context.arc(x, y, radius, 0, Math.PI*2);
 	context.fill();
-	x += 4;
-	y += 2;
-	radius += 1;
-	endArc += .1;
+	x += xSpeed;
+	y += ySpeed;
 }
 
 var ballInt = setInterval(draw, 15);
