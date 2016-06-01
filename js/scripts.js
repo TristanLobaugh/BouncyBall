@@ -1,8 +1,17 @@
 $(document).ready(function(){
+	var startPlayers = 1;
+	var startPoints = 150;
+	var speed = 2;
+
 	var points = [];
 	var players = [];
+	
 	var wHeight = $(window).height() - 10;
 	var wWidth = $(window).width() - 10;
+
+	var worldWidth = 5000;
+	var worldHeight = 5000;
+
 
 	var canvas = document.getElementById("the-canvas");
 	var context = canvas.getContext("2d");
@@ -17,16 +26,32 @@ $(document).ready(function(){
 	}
 
 	function Player(){
-		this.locX = Math.floor((Math.random()*wWidth) + 10); 
-		this.locY = Math.floor((Math.random()*wHeight) + 10);
-		this.xSpeed = 1;
-		this.ySpeed = 1;
-		this.radius = 10;
+		this.locX = Math.floor((Math.random()*worldWidth) + 10); 
+		this.locY = Math.floor((Math.random()*worldHeight) + 10);
+		this.xSpeed = speed;
+		this.ySpeed = speed;
+		this.radius = 6;
 		this.color = getRandomColor();
 	}
 
+	function clamp(value, min, max){
+	    if(value < min) return min;
+	    else if(value > max) return max;
+	    return value;
+	}
+
 	function draw(){
-		context.clearRect(0,0, wWidth,wHeight);
+		context.setTransform(1,0,0,1,0,0);//reset the transform matrix as it is cumulative
+		context.clearRect(0, 0, canvas.width, canvas.height);//clear the viewport AFTER the matrix is reset
+
+		//Clamp the camera position to the world bounds while centering the camera around the player                                             
+		var camX = clamp(-players[0].locX + canvas.width/2, 0, worldWidth - canvas.width);
+		var camY = clamp(-players[0].locY + canvas.height/2, 0, worldHeight - canvas.height);
+
+		context.translate( camX, camY );
+
+		//Draw everything
+		// context.clearRect(0,0, wWidth,wHeight);
 // DRAW POINTS
 		for(var i = 0; i < points.length; i++){
 			context.beginPath();
@@ -36,16 +61,10 @@ $(document).ready(function(){
 		}
 // DRAW PLAYERS
 		for (var i = 0; i < players.length; i++){
-			if(players[i].locX < 10){
-				players[i].xSpeed = Math.floor(Math.random() * 6);
-			}
-			else if(players[i].locX > wWidth){
-				players[i].xSpeed = -(Math.floor(Math.random() * 6));
-			}else if(players[i].locY < 10){
-				players[i].ySpeed = Math.floor(Math.random() * 6);
-			}
-			else if(players[i].locY > wHeight){
-				players[i].ySpeed = -(Math.floor(Math.random() * 6));
+			if(players[i].locX < 10 || players[i].locX > worldWidth){
+				players[i].xSpeed = -players[i].xSpeed;
+			}else if(players[i].locY < 10 || players[i].locY > worldHeight){
+				players[i].ySpeed = -players[i].ySpeed;
 			}
 			context.beginPath();
 			context.fillStyle = players[i].color;
@@ -67,9 +86,9 @@ $(document).ready(function(){
 
 	function Point(){
 		this.color = getRandomColor();
-		this.locX = Math.floor((Math.random()*wWidth) + 10); 
-		this.locY = Math.floor((Math.random()*wHeight) + 10);
-		this.radius = 3;
+		this.locX = Math.floor((Math.random()*worldWidth) + 10); 
+		this.locY = Math.floor((Math.random()*worldHeight) + 10);
+		this.radius = 5;
 	}
 
 	function getRandomColor(){
@@ -90,9 +109,20 @@ $(document).ready(function(){
 					players[i].color = points[j].color;
 					points.splice(j, 1);
 					players[i].radius += 0.25;
+					if(players[i].xSpeed < -0.01){
+						players[i].xSpeed += 0.01;
+					}else if(players[i].xSpeed > 0.01){
+						players[i].xSpeed -= 0.01;
+					}
+					if(players[i].ySpeed < -0.01){
+						players[i].ySpeed += 0.01;
+					}else if(players[i].ySpeed > 0.01){
+						players[i].ySpeed -= 0.01;
+					}
 					if(points.length < 100){
 						pointsMaker(1);
 					}
+					console.log("collision! Xspeed=" +  players[i].xSpeed + players[i].ySpeed);
 				}
 			}
 			for(var k = 0; k < players.length; k++){
@@ -114,8 +144,8 @@ $(document).ready(function(){
 	}
 
 
-	pointsMaker(150);
-	newPlayer(4);
+	pointsMaker(550);
+	newPlayer(1);
 	draw(); 
 //END CODE
 });
