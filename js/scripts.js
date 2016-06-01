@@ -1,7 +1,7 @@
 $(document).ready(function(){
-	var startPlayers = 1;
-	var startPoints = 150;
-	var speed = 2;
+	var startPlayers = 25;
+	var startPoints = 5000;
+	var speed = 8;
 
 	var points = [];
 	var players = [];
@@ -15,10 +15,10 @@ $(document).ready(function(){
 
 	var canvas = document.getElementById("the-canvas");
 	var context = canvas.getContext("2d");
-	canvas.height = wHeight;
 	canvas.width = wWidth;
-	// canvas.style.height = (wHeight * 2) +"px";
+	canvas.height = wHeight;
 	// canvas.style.width = (wWidth * 2) +"px";
+	// canvas.style.height = (wHeight * 2) +"px";
 	function newPlayer(num){
 		for(var i = 0; i < num; i++){
 			players.push(new Player());
@@ -45,21 +45,21 @@ $(document).ready(function(){
 		context.clearRect(0, 0, canvas.width, canvas.height);//clear the viewport AFTER the matrix is reset
 
 		//Clamp the camera position to the world bounds while centering the camera around the player                                             
-		var camX = clamp(-players[0].locX + canvas.width/2, 0, worldWidth - canvas.width);
-		var camY = clamp(-players[0].locY + canvas.height/2, 0, worldHeight - canvas.height);
+		var camX = -players[0].locX + canvas.width/2;
+		var camY = -players[0].locY + canvas.height/2;
 
 		context.translate( camX, camY );
 
 		//Draw everything
 		// context.clearRect(0,0, wWidth,wHeight);
-// DRAW POINTS
+	// DRAW POINTS
 		for(var i = 0; i < points.length; i++){
 			context.beginPath();
 			context.fillStyle = points[i].color;
 			context.arc(points[i].locX, points[i].locY, points[i].radius, 0, Math.PI*2);
 			context.fill();
 		}
-// DRAW PLAYERS
+	// DRAW PLAYERS
 		for (var i = 0; i < players.length; i++){
 			if(players[i].locX < 10 || players[i].locX > worldWidth){
 				players[i].xSpeed = -players[i].xSpeed;
@@ -76,6 +76,14 @@ $(document).ready(function(){
 
 		checkForCollisions();
 		requestAnimationFrame(draw);
+	} //End DRAW FUNCTION
+
+	function getMousePosition(canvas, event){
+		var rect = canvas.getBoundingClientRect();
+		return {
+			x: Math.round((event.clientX-rect.left)/(rect.right-rect.left)*canvas.width),
+			y: Math.round((event.clientY-rect.top)/(rect.bottom-rect.top)*canvas.height)
+		};
 	}
 
 	function pointsMaker(num){
@@ -122,7 +130,7 @@ $(document).ready(function(){
 					if(points.length < 100){
 						pointsMaker(1);
 					}
-					console.log("collision! Xspeed=" +  players[i].xSpeed + players[i].ySpeed);
+					// console.log("collision! Xspeed=" +  players[i].xSpeed + players[i].ySpeed);
 				}
 			}
 			for(var k = 0; k < players.length; k++){
@@ -144,9 +152,19 @@ $(document).ready(function(){
 	}
 
 
-	pointsMaker(550);
-	newPlayer(1);
+	pointsMaker(startPoints);
+	newPlayer(startPlayers);
 	draw(); 
+	canvas.addEventListener("mousemove", function(event){
+		var mousePosition = getMousePosition(canvas, event);
+		var angleDeg = Math.atan2(mousePosition.y - (canvas.height/2), mousePosition.x - (canvas.width/2)) * 180 / Math.PI;
+
+		if(angleDeg >= 0 && angleDeg < 90){
+			xVerctor = 1 - (angleDeg/90);
+			yVector = -(angleDeg/90);
+			console.log(xVerctor + " ======= " + yVector);
+		} 
+	}, false);
 //END CODE
 });
 
