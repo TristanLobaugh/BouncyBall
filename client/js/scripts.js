@@ -1,9 +1,17 @@
 $(document).ready(function(){
+
+// SOCKET.IO STUFF
+	var socketio = io.connect("http://127.0.0.1:3333/connect");
+	socketio.on("message_to_client", function(data){
+		console.log(data.message);
+	});
+
 	var startPlayers = 25;
-	var startPoints = 2000;
+	var startPoints = 1000;
 	var speed = 4;
 	var xVector = 0;
 	var yVector = 0;
+	var zoom = 1.5;
 
 	var points = [];
 	var players = [];
@@ -19,8 +27,6 @@ $(document).ready(function(){
 	var context = canvas.getContext("2d");
 	canvas.width = wWidth;
 	canvas.height = wHeight;
-	// canvas.style.width = (wWidth * 2) +"px";
-	// canvas.style.height = (wHeight * 2) +"px";
 	function newPlayer(num){
 		for(var i = 0; i < num; i++){
 			players.push(new Player());
@@ -30,8 +36,7 @@ $(document).ready(function(){
 	function Player(){
 		this.locX = Math.floor((Math.random()*worldWidth) + 10); 
 		this.locY = Math.floor((Math.random()*worldHeight) + 10);
-		this.xSpeed = speed;
-		this.ySpeed = -speed;
+		this.speed = speed;
 		this.radius = 6;
 		this.color = getRandomColor();
 	}
@@ -43,17 +48,17 @@ $(document).ready(function(){
 	}
 
 	function draw(){
+		canvas.style.width = (wWidth * zoom) +"px";
+		canvas.style.height = (wHeight * zoom) +"px";
 		context.setTransform(1,0,0,1,0,0);//reset the transform matrix as it is cumulative
 		context.clearRect(0, 0, canvas.width, canvas.height);//clear the viewport AFTER the matrix is reset
 
 		//Clamp the camera position to the world bounds while centering the camera around the player                                             
-		var camX = -players[0].locX + canvas.width/2;
-		var camY = -players[0].locY + canvas.height/2;
+		var camX = -players[0].locX + canvas.width/(2*zoom);
+		var camY = -players[0].locY + canvas.height/(2*zoom);
 
-		context.translate( camX, camY );
+		context.translate(camX, camY);
 
-		//Draw everything
-		// context.clearRect(0,0, wWidth,wHeight);
 	// DRAW POINTS
 		for(var i = 0; i < points.length; i++){
 			context.beginPath();
@@ -64,21 +69,25 @@ $(document).ready(function(){
 	// DRAW PLAYERS
 		for (var i = 0; i < players.length; i++){
 			if(players[i].locX < 10 || players[i].locX > worldWidth){
-				players[i].xSpeed = -players[i].xSpeed;
+				players[i].speed = -players[i].speed;
 			}else if(players[i].locY < 10 || players[i].locY > worldHeight){
-				players[i].ySpeed = -players[i].ySpeed;
+				players[i].speed = -players[i].speed;
 			}
 			context.beginPath();
 			context.fillStyle = players[i].color;
 			context.arc(players[i].locX, players[i].locY, players[i].radius, 0, Math.PI*2);
 			context.fill();
+			context.lineWidth = 5;
 			if(i != 0){
-				players[i].locX += players[i].xSpeed;
-				players[i].locY += players[i].ySpeed;
+				context.strokeStyle = '#ff0000';
+				players[i].locX += players[i].speed;
+				players[i].locY += players[i].speed;
 			}else{
-				players[i].locX += players[i].xSpeed * xVector;
-				players[i].locY += players[i].ySpeed * yVector;
+				context.strokeStyle = '#00ff00';
+				players[i].locX += players[i].speed * xVector;
+				players[i].locY -= players[i].speed * yVector;
 			}
+			context.stroke();
 
 		}
 
@@ -89,8 +98,8 @@ $(document).ready(function(){
 	function getMousePosition(canvas, event){
 		var rect = canvas.getBoundingClientRect();
 		return {
-			x: Math.round((event.clientX-rect.left)/(rect.right-rect.left)*canvas.width),
-			y: Math.round((event.clientY-rect.top)/(rect.bottom-rect.top)*canvas.height)
+			x: Math.round((event.clientX-rect.left)/(rect.right-rect.left)*canvas.width*zoom),
+			y: Math.round((event.clientY-rect.top)/(rect.bottom-rect.top)*canvas.height*zoom)
 		};
 	}
 
@@ -117,41 +126,73 @@ $(document).ready(function(){
 	function checkForCollisions(){
 		for(var i = 0; i < players.length; i++){
 			for(var j = 0; j < points.length; j++){
+			// AABB Test
 				if(players[i].locX + players[i].radius + points[j].radius > points[j].locX 
 					&& players[i].locX < points[j].locX + players[i].radius + points[j].radius
 					&& players[i].locY + players[i].radius + points[j].radius > points[j].locY 
 					&& players[i].locY < points[j].locY + players[i].radius + points[j].radius){
-						// console.log("Collision! Point!: x:" + players[i].locX + " y:" + players[i].locY);
-					players[i].color = points[j].color;
-					points.splice(j, 1);
-					players[i].radius += 0.25;
-					if(players[i].xSpeed < -0.01){
-						players[i].xSpeed += 0.01;
-					}else if(players[i].xSpeed > 0.01){
-						players[i].xSpeed -= 0.01;
-					}
-					if(players[i].ySpeed < -0.01){
-						players[i].ySpeed += 0.01;
-					}else if(players[i].ySpeed > 0.01){
-						players[i].ySpeed -= 0.01;
-					}
-					if(points.length < startPoints){
-						pointsMaker(1);
-					}
-					// console.log("collision! Xspeed=" +  players[i].xSpeed + players[i].ySpeed);
+						distance = Math.sqrt(
+							((players[i].locX - points[j].locX) * (players[i].locX - points[j].locX)) + 
+							((players[i].locY - points[j].locY) * (players[i].locY - points[j].locY))	
+							);
+					// Pythagoras test
+						if(distance < players[i].radius + points[j].radius){
+							players[i].color = points[j].color;
+							if(i == 0 && zoom > 1){
+								zoom -= .001;
+							}
+							points.splice(j, 1);
+							players[i].radius += 0.25;
+							if(players[i].speed < -0.005){
+								players[i].speed += 0.005;
+							}else if(players[i].speed > 0.005){
+								players[i].speed -= 0.005;
+							}
+							if(points.length < startPoints){
+								pointsMaker(1);
+							}
+						}
 				}
 			}
 			for(var k = 0; k < players.length; k++){
 				if(players[i] != players[k]){
+				// AABB Test
 					if(players[i].locX + players[i].radius + players[k].radius > players[k].locX 
 					&& players[i].locX < players[k].locX + players[i].radius + players[k].radius
 					&& players[i].locY + players[i].radius + players[k].radius > players[k].locY 
 					&& players[i].locY < players[k].locY + players[i].radius + players[k].radius){
-						// console.log("Collision! Players!: x:" + players[i].locX + " y:" + players[i].locY);
-						if(players[i].radius > players[k].radius){
-							players.splice(k, 1);
-						}else if(players[i].radius < players[k].radius){
-							players.splice(i, 1)
+						distance = Math.sqrt(
+							((players[i].locX - players[k].locX) * (players[i].locX - players[k].locX)) + 
+							((players[i].locY - players[k].locY) * (players[i].locY - players[k].locY))	
+							);
+					// Pythagoras test
+						if(distance < players[i].radius + players[k].radius){
+							if(players[i].radius > players[k].radius){
+						// BOT DEATH
+								socketio.emit("message_to_server", {
+									message: "Bot Killed",
+									id: k,
+									killedBy: i,
+									radius: players[k].radius
+								});
+								players[i].radius += (players[k].radius * 0.25)
+								if(i == 0){
+									zoom -= (players[k].radius * 0.25) * .001;
+								}
+								players.splice(k, 1);
+							}else if(players[i].radius < players[k].radius){
+						// DEATH
+								socketio.emit("message_to_server", {
+									message: "PLAYER DEATH",
+									id: i,
+									killedBy: k,
+									radius: players[i].radius
+								});								
+								players[k].radius += (players[i].radius * 0.25)
+								zoom -= (players[i].radius * 0.25) * .01;
+								players.splice(i, 1)
+
+							}
 						}
 					}
 				}
@@ -165,23 +206,18 @@ $(document).ready(function(){
 	canvas.addEventListener("mousemove", function(event){
 		var mousePosition = getMousePosition(canvas, event);
 		var angleDeg = Math.atan2(mousePosition.y - (canvas.height/2), mousePosition.x - (canvas.width/2)) * 180 / Math.PI;
-		console.log(angleDeg);
 		if(angleDeg >= 0 && angleDeg < 90){
 			xVector = 1 - (angleDeg/90);
 			yVector = -(angleDeg/90);
-			console.log(xVector + " ======= " + yVector);
 		}else if(angleDeg >= 90 && angleDeg <= 180){
 			xVector = -(angleDeg-90)/90;
 			yVector = -(1 - ((angleDeg-90)/90));
-			console.log(xVector + " ======= " + yVector);
 		}else if(angleDeg >= -180 && angleDeg < -90){
 			xVector = (angleDeg+90)/90;
 			yVector = (1 + ((angleDeg+90)/90));
-			console.log(xVector + " ======= " + yVector);
 		}else if(angleDeg < 0 && angleDeg >= -90){
 			xVector = (angleDeg+90)/90;
 			yVector = (1 - ((angleDeg+90)/90));
-			console.log(xVector + " ======= " + yVector);
 		}
 
 
