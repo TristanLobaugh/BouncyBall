@@ -1,7 +1,9 @@
 $(document).ready(function(){
 	var startPlayers = 25;
-	var startPoints = 5000;
-	var speed = 8;
+	var startPoints = 2000;
+	var speed = 4;
+	var xVector = 0;
+	var yVector = 0;
 
 	var points = [];
 	var players = [];
@@ -29,7 +31,7 @@ $(document).ready(function(){
 		this.locX = Math.floor((Math.random()*worldWidth) + 10); 
 		this.locY = Math.floor((Math.random()*worldHeight) + 10);
 		this.xSpeed = speed;
-		this.ySpeed = speed;
+		this.ySpeed = -speed;
 		this.radius = 6;
 		this.color = getRandomColor();
 	}
@@ -70,8 +72,14 @@ $(document).ready(function(){
 			context.fillStyle = players[i].color;
 			context.arc(players[i].locX, players[i].locY, players[i].radius, 0, Math.PI*2);
 			context.fill();
-			players[i].locX += players[i].xSpeed;
-			players[i].locY += players[i].ySpeed;
+			if(i != 0){
+				players[i].locX += players[i].xSpeed;
+				players[i].locY += players[i].ySpeed;
+			}else{
+				players[i].locX += players[i].xSpeed * xVector;
+				players[i].locY += players[i].ySpeed * yVector;
+			}
+
 		}
 
 		checkForCollisions();
@@ -127,7 +135,7 @@ $(document).ready(function(){
 					}else if(players[i].ySpeed > 0.01){
 						players[i].ySpeed -= 0.01;
 					}
-					if(points.length < 100){
+					if(points.length < startPoints){
 						pointsMaker(1);
 					}
 					// console.log("collision! Xspeed=" +  players[i].xSpeed + players[i].ySpeed);
@@ -154,17 +162,31 @@ $(document).ready(function(){
 
 	pointsMaker(startPoints);
 	newPlayer(startPlayers);
-	draw(); 
 	canvas.addEventListener("mousemove", function(event){
 		var mousePosition = getMousePosition(canvas, event);
 		var angleDeg = Math.atan2(mousePosition.y - (canvas.height/2), mousePosition.x - (canvas.width/2)) * 180 / Math.PI;
-
+		console.log(angleDeg);
 		if(angleDeg >= 0 && angleDeg < 90){
-			xVerctor = 1 - (angleDeg/90);
+			xVector = 1 - (angleDeg/90);
 			yVector = -(angleDeg/90);
-			console.log(xVerctor + " ======= " + yVector);
-		} 
+			console.log(xVector + " ======= " + yVector);
+		}else if(angleDeg >= 90 && angleDeg <= 180){
+			xVector = -(angleDeg-90)/90;
+			yVector = -(1 - ((angleDeg-90)/90));
+			console.log(xVector + " ======= " + yVector);
+		}else if(angleDeg >= -180 && angleDeg < -90){
+			xVector = (angleDeg+90)/90;
+			yVector = (1 + ((angleDeg+90)/90));
+			console.log(xVector + " ======= " + yVector);
+		}else if(angleDeg < 0 && angleDeg >= -90){
+			xVector = (angleDeg+90)/90;
+			yVector = (1 - ((angleDeg+90)/90));
+			console.log(xVector + " ======= " + yVector);
+		}
+
+
 	}, false);
+	draw(); 
 //END CODE
 });
 
