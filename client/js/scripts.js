@@ -1,7 +1,7 @@
 $(document).ready(function(){
 
 // SOCKET.IO STUFF
-	var socketio = io.connect("http://127.0.0.1:3333/connect");
+	var socketio = io.connect();
 	socketio.on("message_to_client", function(data){
 		console.log(data.message);
 	});
@@ -40,12 +40,12 @@ $(document).ready(function(){
 		this.radius = 6;
 		this.color = getRandomColor();
 	}
-
-	function clamp(value, min, max){
-	    if(value < min) return min;
-	    else if(value > max) return max;
-	    return value;
-	}
+	// Currently not used, but should stop the camera from over scrolling
+	// function clamp(value, min, max){
+	//     if(value < min) return min;
+	//     else if(value > max) return max;
+	//     return value;
+	// }
 
 	function draw(){
 		canvas.style.width = (wWidth * zoom) +"px";
@@ -126,16 +126,16 @@ $(document).ready(function(){
 	function checkForCollisions(){
 		for(var i = 0; i < players.length; i++){
 			for(var j = 0; j < points.length; j++){
-			// AABB Test
+			// AABB Test(square)
 				if(players[i].locX + players[i].radius + points[j].radius > points[j].locX 
 					&& players[i].locX < points[j].locX + players[i].radius + points[j].radius
 					&& players[i].locY + players[i].radius + points[j].radius > points[j].locY 
 					&& players[i].locY < points[j].locY + players[i].radius + points[j].radius){
+				// Pythagoras test(cricle)
 						distance = Math.sqrt(
 							((players[i].locX - points[j].locX) * (players[i].locX - points[j].locX)) + 
 							((players[i].locY - points[j].locY) * (players[i].locY - points[j].locY))	
 							);
-					// Pythagoras test
 						if(distance < players[i].radius + points[j].radius){
 							players[i].color = points[j].color;
 							if(i == 0 && zoom > 1){
@@ -161,11 +161,11 @@ $(document).ready(function(){
 					&& players[i].locX < players[k].locX + players[i].radius + players[k].radius
 					&& players[i].locY + players[i].radius + players[k].radius > players[k].locY 
 					&& players[i].locY < players[k].locY + players[i].radius + players[k].radius){
+				// Pythagoras test
 						distance = Math.sqrt(
 							((players[i].locX - players[k].locX) * (players[i].locX - players[k].locX)) + 
 							((players[i].locY - players[k].locY) * (players[i].locY - players[k].locY))	
 							);
-					// Pythagoras test
 						if(distance < players[i].radius + players[k].radius){
 							if(players[i].radius > players[k].radius){
 						// BOT DEATH
@@ -181,7 +181,7 @@ $(document).ready(function(){
 								}
 								players.splice(k, 1);
 							}else if(players[i].radius < players[k].radius){
-						// DEATH
+						// Player DEATH
 								socketio.emit("message_to_server", {
 									message: "PLAYER DEATH",
 									id: i,

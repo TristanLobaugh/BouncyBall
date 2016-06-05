@@ -22,35 +22,30 @@
 
 ##Code Examples
 
-### canvas draw function
+### Event listener for having plotting the mouse position relative to the players location.
 ```
-function draw(){
-	if(x < 10){
-		xSpeed = Math.floor(Math.random() * 6);
+canvas.addEventListener("mousemove", function(event){
+	var mousePosition = getMousePosition(canvas, event);
+	var angleDeg = Math.atan2(mousePosition.y - (canvas.height/2), mousePosition.x - (canvas.width/2)) * 180 / Math.PI;
+	if(angleDeg >= 0 && angleDeg < 90){
+		xVector = 1 - (angleDeg/90);
+		yVector = -(angleDeg/90);
+	}else if(angleDeg >= 90 && angleDeg <= 180){
+		xVector = -(angleDeg-90)/90;
+		yVector = -(1 - ((angleDeg-90)/90));
+	}else if(angleDeg >= -180 && angleDeg < -90){
+		xVector = (angleDeg+90)/90;
+		yVector = (1 + ((angleDeg+90)/90));
+	}else if(angleDeg < 0 && angleDeg >= -90){
+		xVector = (angleDeg+90)/90;
+		yVector = (1 - ((angleDeg+90)/90));
 	}
-	else if(x > 790){
-		xSpeed = -(Math.floor(Math.random() * 6));
-	}else if(y < 10){
-		ySpeed = Math.floor(Math.random() * 6);
-	}
-	else if(y > 590){
-		ySpeed = -(Math.floor(Math.random() * 6));
-	}
-	context.clearRect(0,0, 800,600);
+}, false);
+```
 
-	for(var i = 0; i < points.length; i++){
-	context.beginPath();
-	context.fillStyle = points[i].color;
-	context.arc(points[i].locX, points[i].locY, 3, 0, Math.PI*2);
-	context.fill();
-	}
+### 
+```
 
-	context.beginPath();
-	context.arc(x, y, radius, 0, Math.PI*2);
-	context.fill();
-	x += xSpeed;
-	y += ySpeed;
-}
 ```
 
 

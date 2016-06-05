@@ -7,7 +7,7 @@ body{
 }
 canvas{
 	display: block;
-	border: red solid 5px;
+	/*border: red solid 5px;*/
 
 	background-color: white;
 }
