@@ -114,6 +114,7 @@ io.sockets.on("connect", function(socket){
 						}
 					}
 			}
+		}
 			
 			for(var k = 0; k < players.length; k++){
 				if(player.id != players[k].id){
@@ -135,7 +136,6 @@ io.sockets.on("connect", function(socket){
 									message: "Bot Killed",
 									died: players[k].id,
 									killedBy: player.id,
-									radius: players[k].radius
 								});
 								player.radius += (players[k].radius * 0.25)
 								if(player.zoom > 1){
@@ -150,7 +150,6 @@ io.sockets.on("connect", function(socket){
 									message: "PLAYER DEATH",
 									died: player.id,
 									killedBy: players[k].name,
-									radius: player.radius
 								});								
 								players[k].radius += (player.radius * 0.25)
 								player.zoom -= (player.radius * 0.25) * .01;
@@ -168,7 +167,6 @@ io.sockets.on("connect", function(socket){
 					}
 				}
 			}
-		}
 		for(var i = 0; i < players.length; i++){
 				if(players[i].id == player.id){
 					players[i] = player;

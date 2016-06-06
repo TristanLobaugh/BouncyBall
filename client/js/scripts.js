@@ -64,13 +64,12 @@ $(document).ready(function(){
 	});
 
 	socket.on("death", function(data){
-		if(player.id == data.died){
+			player.alive = false;
 			clearInterval(tickInterval);
-			// respawn = confirm("Would you like to respawn?");
-			// if(respawn){
-			// 	spawn();
-			// }
-		}
+			respawn = confirm("Would you like to respawn?");
+			if(respawn){
+				spawn();
+			}
 		console.log(data.message);		
 	});
 
