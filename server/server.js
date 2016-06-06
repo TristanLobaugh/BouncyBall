@@ -6,7 +6,7 @@ var connections = [];
 var players = [];
 var orbs = [];
 var scoreboard = [];
-var defaultSpeed = 4;
+var defaultSpeed = 6;
 var defaultSize = 6;
 var defaultzoom = 1.5;
 var defaultOrbs = 1000;
@@ -64,99 +64,100 @@ io.sockets.on("connect", function(socket){
 				player.locX += player.speed * player.xVector;
 				player.locY -= player.speed * player.yVector;
 			}
-			for(var i = 0; i < players.length; i++){
+			
+		checkForCollisions(player);
+		}
+	})
+	
+	function checkForCollisions(player){
+		for(var j = 0; j < orbs.length; j++){
+		// AABB Test(square)
+			if(player.locX + player.radius + orbs[j].radius > orbs[j].locX 
+				&& player.locX < orbs[j].locX + player.radius + orbs[j].radius
+				&& player.locY + player.radius + orbs[j].radius > orbs[j].locY 
+				&& player.locY < orbs[j].locY + player.radius + orbs[j].radius){
+			// Pythagoras test(cricle)
+					distance = Math.sqrt(
+						((player.locX - orbs[j].locX) * (player.locX - orbs[j].locX)) + 
+						((player.locY - orbs[j].locY) * (player.locY - orbs[j].locY))	
+						);
+					if(distance < player.radius + orbs[j].radius){
+						player.color = orbs[j].color;
+						if(player.zoom > 1){
+							player.zoom -= .001;
+						}
+						orbs.splice(j, 1);
+						console.log(orbs.length);
+						player.radius += 0.25;
+						if(player.speed < -0.005){
+							player.speed += 0.005;
+						}else if(player.speed > 0.005){
+							player.speed -= 0.005;
+						}
+						if(orbs.length < defaultOrbs){
+							createOrbs(1);
+						}
+					}
+			}
+			
+			for(var k = 0; k < players.length; k++){
+				if(player.id != players[k].id){
+				// AABB Test
+					if(player.locX + player.radius + players[k].radius > players[k].locX 
+					&& player.locX < players[k].locX + player.radius + players[k].radius
+					&& player.locY + player.radius + players[k].radius > players[k].locY 
+					&& player.locY < players[k].locY + player.radius + players[k].radius){
+				// Pythagoras test
+						distance = Math.sqrt(
+							((player.locX - players[k].locX) * (player.locX - players[k].locX)) + 
+							((player.locY - players[k].locY) * (player.locY - players[k].locY))	
+							);
+						if(distance < player.radius + players[k].radius){
+							if(player.radius > players[k].radius){
+						// BOT DEATH
+								socket.emit("message_to_server", {
+									message: "Bot Killed",
+									id: k,
+									killedBy: player.id,
+									radius: players[k].radius
+								});
+								player.radius += (players[k].radius * 0.25)
+								if(player.zoom > 1){
+									player.zoom -= (players[k].radius * 0.25) * .001;
+								}
+								players.splice(k, 1);
+							}else if(player.radius < players[k].radius){
+						// Player DEATH
+								socket.emit("message_to_server", {
+									message: "PLAYER DEATH",
+									id: player.id,
+									killedBy: k,
+									radius: player.radius
+								});								
+								players[k].radius += (player.radius * 0.25)
+								player.zoom -= (player.radius * 0.25) * .01;
+								for(var i = 0; i < players.length; i++){
+									if(players[i].id == player.id){
+										players.splice(i, 1);
+									}
+								}
+								
+							}
+						}
+					}
+				}
+			}
+		}
+		for(var i = 0; i < players.length; i++){
 				if(players[i].id == player.id){
-					players[i].locX = player.locX;
-					players[i].locY = player.locY;
+					players[i] = player;
 				}
 			}
 		socket.emit("tock",{
 			players: players,
-			x: player.locX,
-			y: player.locY
+			orbs: orbs,
+			player: player
 		});
-		checkForCollisions();
-		}
-	})
-	
-	function checkForCollisions(){
-		for(var i = 0; i < players.length; i++){
-			for(var j = 0; j < orbs.length; j++){
-			// AABB Test(square)
-				if(players[i].locX + players[i].radius + orbs[j].radius > orbs[j].locX 
-					&& players[i].locX < orbs[j].locX + players[i].radius + orbs[j].radius
-					&& players[i].locY + players[i].radius + orbs[j].radius > orbs[j].locY 
-					&& players[i].locY < orbs[j].locY + players[i].radius + orbs[j].radius){
-				// Pythagoras test(cricle)
-						distance = Math.sqrt(
-							((players[i].locX - orbs[j].locX) * (players[i].locX - orbs[j].locX)) + 
-							((players[i].locY - orbs[j].locY) * (players[i].locY - orbs[j].locY))	
-							);
-						if(distance < players[i].radius + orbs[j].radius){
-							players[i].color = orbs[j].color;
-							if(i == 0 && players[i].zoom > 1){
-								players[i].zoom -= .001;
-							}
-							orbs.splice(j, 1);
-							players[i].radius += 0.25;
-							if(players[i].speed < -0.005){
-								players[i].speed += 0.005;
-							}else if(players[i].speed > 0.005){
-								players[i].speed -= 0.005;
-							}
-							if(orbs.length < defaultOrbs){
-								createOrbs(1);
-							}
-							socket.emit("collision",{
-								players: players,
-								orbs: orbs
-							});
-						}
-				}
-			}
-			// for(var k = 0; k < players.length; k++){
-			// 	if(players[i] != players[k]){
-			// 	// AABB Test
-			// 		if(players[i].locX + players[i].radius + players[k].radius > players[k].locX 
-			// 		&& players[i].locX < players[k].locX + players[i].radius + players[k].radius
-			// 		&& players[i].locY + players[i].radius + players[k].radius > players[k].locY 
-			// 		&& players[i].locY < players[k].locY + players[i].radius + players[k].radius){
-			// 	// Pythagoras test
-			// 			distance = Math.sqrt(
-			// 				((players[i].locX - players[k].locX) * (players[i].locX - players[k].locX)) + 
-			// 				((players[i].locY - players[k].locY) * (players[i].locY - players[k].locY))	
-			// 				);
-			// 			if(distance < players[i].radius + players[k].radius){
-			// 				if(players[i].radius > players[k].radius){
-			// 			// BOT DEATH
-			// 					socket.emit("message_to_server", {
-			// 						message: "Bot Killed",
-			// 						id: k,
-			// 						killedBy: i,
-			// 						radius: players[k].radius
-			// 					});
-			// 					players[i].radius += (players[k].radius * 0.25)
-			// 					if(i == 0){
-			// 						player.zoom -= (players[k].radius * 0.25) * .001;
-			// 					}
-			// 					players.splice(k, 1);
-			// 				}else if(players[i].radius < players[k].radius){
-			// 			// Player DEATH
-			// 					socket.emit("message_to_server", {
-			// 						message: "PLAYER DEATH",
-			// 						id: i,
-			// 						killedBy: k,
-			// 						radius: players[i].radius
-			// 					});								
-			// 					players[k].radius += (players[i].radius * 0.25)
-			// 					player.zoom -= (players[i].radius * 0.25) * .01;
-			// 					players.splice(i, 1)
-			// 				}
-			// 			}
-			// 		}
-			// 	}
-			// }
-		}
 	}
 
 	// connections.push(socket);
@@ -196,8 +197,8 @@ function createOrbs(num){
 
 function Orb(){
 	this.color = getRandomColor();
-	this.locX = Math.floor((Math.random()*worldWidth) + 10); 
-	this.locY = Math.floor((Math.random()*worldHeight) + 10);
+	this.locX = Math.floor(Math.random()*worldWidth); 
+	this.locY = Math.floor(Math.random()*worldHeight);
 	this.radius = 5;
 }
 

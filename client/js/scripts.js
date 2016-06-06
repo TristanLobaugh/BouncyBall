@@ -33,22 +33,12 @@ $(document).ready(function(){
 		socket.emit("tick",{
 			player: player
 		});
-	}, 1000/60);
+	}, 1000/25);
 
 	socket.on("tock", function(data){
 		players = data.players;
-		player.locX = data.x;
-		player.locY = data.y;
-	});
-
-	socket.on("collision", function(data){
-		players = data.players;
-		// orbs = data.orbs;
-		for(var i = 0; i < players.length; i++){
-			if(players[i].id == player.id){
-				player = players[i];
-			}
-		}
+		orbs = data.orbs;
+		player = data.player;
 	});
 
 
