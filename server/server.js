@@ -26,17 +26,22 @@ io.sockets.on("connect", function(socket){
 		initGame();
 		console.log("New Field");
 	}
-	newPlayer();
-	function newPlayer(){
-		players.push(new Player());
-		socket.emit("init",{
+
+	socket.on("init", function(data){
+		newPlayer(data.playerName);
+	})
+
+	function newPlayer(playerName){
+		players.push(new Player(playerName));
+		socket.emit("init_return",{
 			init: players[players.length-1],
 			orbs: orbs,
 			players: players
 		});
 	}
-	function Player(){
+	function Player(playerName){
 		this.id = (socket.id).substring(2);
+		this.name = playerName;
 		this.locX = Math.floor((Math.random()*worldWidth) + 10); 
 		this.locY = Math.floor((Math.random()*worldHeight) + 10);
 		this.speed = defaultSpeed;
@@ -47,29 +52,40 @@ io.sockets.on("connect", function(socket){
 		this.yVector = 0;
 		this.worldWidth = worldWidth;
 		this.worldHeight = worldHeight;
+		this.team = 0; // TO DO set random team set.
+		this.alive = true;
 	}
 
 	socket.on("tick", function(data){
-		movePlayer(data.player);
-		function movePlayer(player){
-			if(((player.locX < 5 && player.xVector < 0) || (player.locX > player.worldWidth) && (player.xVector > 0)) && ((player.locY < 5 && player.yVector > 0) || (player.locY > player.worldHeight) && (player.yVector < 0))){
-				console.log("can't move X or Y");
-			}else if((player.locX < 5 && player.xVector < 0) || (player.locX > player.worldWidth) && (player.xVector > 0)){
-				player.locY -= player.speed * player.yVector;
-				console.log("cant move X");
-			}else if((player.locY < 5 && player.yVector > 0) || (player.locY > player.worldHeight) && (player.yVector < 0)){
-				player.locX += player.speed * player.xVector;
-				console.log("cant move Y");
-			}else{
-				player.locX += player.speed * player.xVector;
-				player.locY -= player.speed * player.yVector;
+		for(var i = 0; i < players.length; i++){
+			if(players[i].id == data.playerID){
+				player = players[i];
+				player.xVector = data.playerXVector;
+				player.yVector = data.playerYVector;
 			}
-			
-		checkForCollisions(player);
 		}
-	})
+		if(player.alive){
+			movePlayer();
+			function movePlayer(){
+				if(((player.locX < 5 && player.xVector < 0) || (player.locX > player.worldWidth) && (player.xVector > 0)) && ((player.locY < 5 && player.yVector > 0) || (player.locY > player.worldHeight) && (player.yVector < 0))){
+					// console.log("can't move X or Y");
+				}else if((player.locX < 5 && player.xVector < 0) || (player.locX > player.worldWidth) && (player.xVector > 0)){
+					player.locY -= player.speed * player.yVector;
+					// console.log("cant move X");
+				}else if((player.locY < 5 && player.yVector > 0) || (player.locY > player.worldHeight) && (player.yVector < 0)){
+					player.locX += player.speed * player.xVector;
+					// console.log("cant move Y");
+				}else{
+					player.locX += player.speed * player.xVector;
+					player.locY -= player.speed * player.yVector;
+				}
+				
+			checkForCollisions();
+			}
+		}
+	});
 	
-	function checkForCollisions(player){
+	function checkForCollisions(){
 		for(var j = 0; j < orbs.length; j++){
 		// AABB Test(square)
 			if(player.locX + player.radius + orbs[j].radius > orbs[j].locX 
@@ -87,7 +103,6 @@ io.sockets.on("connect", function(socket){
 							player.zoom -= .001;
 						}
 						orbs.splice(j, 1);
-						console.log(orbs.length);
 						player.radius += 0.25;
 						if(player.speed < -0.005){
 							player.speed += 0.005;
@@ -114,10 +129,11 @@ io.sockets.on("connect", function(socket){
 							);
 						if(distance < player.radius + players[k].radius){
 							if(player.radius > players[k].radius){
-						// BOT DEATH
-								socket.emit("message_to_server", {
+						// ENEMY DEATH
+								players[k].alive = false;
+								socket.emit("death", {
 									message: "Bot Killed",
-									id: k,
+									died: players[k].id,
 									killedBy: player.id,
 									radius: players[k].radius
 								});
@@ -125,19 +141,24 @@ io.sockets.on("connect", function(socket){
 								if(player.zoom > 1){
 									player.zoom -= (players[k].radius * 0.25) * .001;
 								}
+								console.log("Death and cut");
 								players.splice(k, 1);
 							}else if(player.radius < players[k].radius){
 						// Player DEATH
-								socket.emit("message_to_server", {
+								player.alive = false;
+								socket.emit("death", {
 									message: "PLAYER DEATH",
-									id: player.id,
-									killedBy: k,
+									died: player.id,
+									killedBy: players[k].name,
 									radius: player.radius
 								});								
 								players[k].radius += (player.radius * 0.25)
 								player.zoom -= (player.radius * 0.25) * .01;
 								for(var i = 0; i < players.length; i++){
+									console.log("trying to cut");
+									console.log(players[i].id + " - " + player.id);
 									if(players[i].id == player.id){
+										console.log("Death and cut");
 										players.splice(i, 1);
 									}
 								}
@@ -209,3 +230,9 @@ function getRandomColor(){
 	return "rgb(" + r + "," + g + "," + b + ")";
 }
 
+setInterval(function(){
+	for(var i = 0; i < players.length; i++){
+		console.log(players[i].id);
+		console.log(players[i].alive);
+		console.log(players[i].radius);
+	}}, 1000);
