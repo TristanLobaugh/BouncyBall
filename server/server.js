@@ -27,6 +27,14 @@ io.sockets.on("connect", function(socket){
 		console.log("New Field");
 	}
 
+	connections.push(socket);
+	console.log('Connected: %s sockets connected', connections.length);
+
+	socket.on('disconnect', function(data){
+		connections.splice(connections.indexOf(socket), 1);
+		console.log('Disconnected: %s sockets connected', connections.length);
+	});	
+
 	socket.on("init", function(data){
 		newPlayer(data.playerName);
 	})
@@ -141,7 +149,6 @@ io.sockets.on("connect", function(socket){
 								if(player.zoom > 1){
 									player.zoom -= (players[k].radius * 0.25) * .001;
 								}
-								console.log("Death and cut");
 								players.splice(k, 1);
 							}else if(player.radius < players[k].radius){
 						// Player DEATH
@@ -154,10 +161,7 @@ io.sockets.on("connect", function(socket){
 								players[k].radius += (player.radius * 0.25)
 								player.zoom -= (player.radius * 0.25) * .01;
 								for(var i = 0; i < players.length; i++){
-									console.log("trying to cut");
-									console.log(players[i].id + " - " + player.id);
 									if(players[i].id == player.id){
-										console.log("Death and cut");
 										players.splice(i, 1);
 									}
 								}
@@ -179,25 +183,7 @@ io.sockets.on("connect", function(socket){
 		});
 	}
 
-	// connections.push(socket);
-	console.log('Connected: %s sockets connected', players.length);
 
-	socket.on("message_to_server", function(data){
-		console.log(data);
-		io.sockets.emit("message_to_client",{
-			message: "Message Recieved, player " + data.id + " killed by player " + data.killedBy + " when he had radius of " + data.radius + "."  
-		});
-	});
-
-	socket.on('disconnect', function(data){
-		// connections.splice(connections.indexOf(socket), 1);
-		for(var i = 0; i < players.length; i++){
-			if(players[i].id == (socket.id).substring(2)){
-				players.splice(i, 1);
-			}
-		}
-		console.log('Disconnected: %s sockets connected', players.length);
-	});	
 
 // END SOCKETS	
 });
@@ -227,10 +213,3 @@ function getRandomColor(){
 		b = Math.floor((Math.random()*206)+50);
 	return "rgb(" + r + "," + g + "," + b + ")";
 }
-
-setInterval(function(){
-	for(var i = 0; i < players.length; i++){
-		console.log(players[i].id);
-		console.log(players[i].alive);
-		console.log(players[i].radius);
-	}}, 1000);
