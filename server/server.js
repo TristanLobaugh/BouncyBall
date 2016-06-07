@@ -33,6 +33,11 @@ io.sockets.on("connect", function(socket){
 	socket.on('disconnect', function(data){
 		connections.splice(connections.indexOf(socket), 1);
 		console.log('Disconnected: %s sockets connected', connections.length);
+		for(var i = 0; i < players.length; i++){
+			if(players[i].id == (socket.id).substring(2)){
+				players.splice(i, 1);
+			}
+		}
 	});	
 
 	socket.on("init", function(data){
@@ -140,10 +145,10 @@ io.sockets.on("connect", function(socket){
 							if(player.radius > players[k].radius){
 						// ENEMY DEATH
 								players[k].alive = false;
-								socket.emit("death", {
+								io.sockets.emit("death", {
 									message: "Bot Killed",
 									died: players[k].id,
-									killedBy: player.id,
+									killedBy: player.name,
 								});
 								player.radius += (players[k].radius * 0.25)
 								if(player.zoom > 1){
@@ -153,7 +158,7 @@ io.sockets.on("connect", function(socket){
 							}else if(player.radius < players[k].radius){
 						// Player DEATH
 								player.alive = false;
-								socket.emit("death", {
+								io.sockets.emit("death", {
 									message: "PLAYER DEATH",
 									died: player.id,
 									killedBy: players[k].name,

@@ -1,14 +1,12 @@
-$(document).ready(function(){
-	var tickInterval;
+var app = angular.module("orbApp", []);
+app.controller("orbController", function($scope){
+	var player = {};
 	var orbs;
 	var players;
 	var wHeight = $(window).height();
 	var wWidth = $(window).width();
-	var player = {};
+	var tickInterval;
 	var fps = 1000/30;
-	player.zoom = 1.5;
-
-	var startorbs = 1000;
 
 	var canvas = document.getElementById("the-canvas");
 	var context = canvas.getContext("2d");
@@ -17,18 +15,25 @@ $(document).ready(function(){
 
 	var socket = io.connect();
 
-	spawn();
+	$(window).load(function(){
+		$("#spawnModal").modal("show");
+	});
 
-	function spawn(){
-		player.name = prompt("Please enter your name!");
-		if(player.name){
-			init();
-		}
+
+	$scope.submitName = function(){
+		player.name = $scope.playerName
 	}
 
-	// SOCKET.IO STUFF
-	
+	$(".name-form").submit(function(event){
+		event.preventDefault();
+		player.name = $("#name-input").val();
+		$(".modal").modal("hide");
+		if(player.name){
+			init();
+		}	
+	});
 
+	// SOCKET.IO STUFF
 	function init(){
 		socket.emit("init",{
 			playerName: player.name
@@ -64,13 +69,17 @@ $(document).ready(function(){
 	});
 
 	socket.on("death", function(data){
+		console.log(data);
+		if(player.id == data.died){	
+			
 			player.alive = false;
 			clearInterval(tickInterval);
-			respawn = confirm("Would you like to respawn?");
-			if(respawn){
-				spawn();
-			}
-		console.log(data.message);		
+			$("#deathModal").modal("show");
+			$scope.$apply(function(){
+				$scope.killer = data.killedBy;
+			})
+			console.log($scope.killer);
+		}
 	});
 
 	// Currently not used, but should stop the camera from over scrolling
@@ -142,7 +151,9 @@ $(document).ready(function(){
 			player.yVector = (1 - ((angleDeg+90)/90));
 		}
 	}, false);
-//END CODE
+
+
+//END CONTROLLER
 });
 
 	

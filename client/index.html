@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="orbApp">
 <head>
 	<title>Bouncy Ball</title>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 	<link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
-<body>
+<body ng-controller="orbController">
 
 	<div id="container">
 		<div id="game-field" class="col-sm-12">
@@ -14,7 +14,75 @@
 			</canvas>
 		</div>
 	</div>
+
+			<!-- Modals -->
+			<div id="spawnModal" class="modal fade" role="dialog">
+				<div class="modal-dialog modal-sm">
+
+				<!-- Modal content-->
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h2 class="modal-title text-center">Orb-Blitz</h2>
+						</div>
+						<div class="modal-body">
+							<form class="name-form" ng-submit="submitName()">
+								<input id="name-input" class="text-center form-control" type="text" name="name-input" ng-model="playerName" placeholder="Enter your name here" required>
+								<button id="play-button" type="submit" class="btn">Play Orb-Blitz!</button>
+							</form>
+						</div>
+						<div class="modal-footer">
+							<div id="instructions">
+								<label id="how-to-play">How to play:</label>
+								<ul>
+									<li>Move your mouse on the screen to move your character.</li>
+									<li>Absorb orbs by running over them in order to grow your character.</li>
+									<li>The larger you get the slower you are.</li>
+									<li>Objective: Absorb other players to get even larger but not lose speed.</li>
+									<li>The larger player absorbs the smaller player.</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+			<div id="deathModal" class="modal fade" role="dialog">
+				<div class="modal-dialog modal-sm">
+
+				<!-- Modal content-->
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h2 id="death-message" class="modal-title text-center">You were killed by: <span id="killed-by">{{killer}}</span></h2>
+						</div>
+						<div class="modal-body">
+							<form class="name-form" ng-submit="submitName()">
+								<input id="name-input" class="text-center form-control" type="text" name="name-input" ng-model="playerName" placeholder="Enter your name here" required>
+								<button id="play-button" type="submit" class="btn">Respawn?</button>
+							</form>
+						</div>
+						<div class="modal-footer">
+							<div id="instructions">
+								<label id="how-to-play">How to play:</label>
+								<ul>
+									<li>Move your mouse on the screen to move your character.</li>
+									<li>Absorb orbs by running over them in order to grow your character.</li>
+									<li>The larger you get the slower you are.</li>
+									<li>Objective: Absorb other players to get even larger but not lose speed.</li>
+									<li>The larger player absorbs the smaller player.</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script type="text/javascript" src="js/scripts.js"></script>
 </body>

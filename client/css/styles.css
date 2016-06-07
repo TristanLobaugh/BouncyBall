@@ -7,10 +7,43 @@ body{
 }
 canvas{
 	display: block;
-	/*border: red solid 5px;*/
-
 	background-color: white;
 }
+.modal-sm{
+	min-width: 400px;
+	width: 30%;
+}
+
+.modal-content{
+	margin-top: 100px;
+	background-color: #FFFFFF;
+	border-radius: 10px;
+}
+
+#name-input{
+	font-size: 20px;
+	display: block;
+	margin: auto;
+	width: 90%;
+	padding: 5px;
+	border-radius: 5px;
+}
+
+#play-button{
+	font-size: 20px;	
+	display: block;
+	margin: 25px auto 5px;
+	width: 90%;
+	background-color: #00e600;
+	color: #FFFFFF;
+}
+
+.modal-footer{
+	text-align: left;
+}
+
+
+
 
 
 
