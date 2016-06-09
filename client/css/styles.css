@@ -88,7 +88,12 @@ canvas{
 	border-radius: 5px;
 }
 
-#play-button{
+.error-message{
+	font-size: 13px;
+	color: #e60000;
+}
+
+.play-button{
 	font-size: 20px;	
 	display: block;
 	margin: 25px auto 5px;
@@ -106,6 +111,54 @@ canvas{
 	color: #FFFFFF;
 }
 
+#playerStats-all-btn, #playerStats-player-btn{
+	font-size: 20px;	
+	display: block;
+	margin: 5px auto 5px;
+	width: 90%;
+	background-color: #e600e6;
+	color: #FFFFFF;
+}
+
+.stats-btn-wrapper{
+	width: 90%;
+	margin: 20px auto;
+	margin-bottom: 60px;
+}
+
+.btn-wrapper{
+	width: 90%;
+	margin: 20px auto;
+}
+
+.stats-btn{
+	width: 48%;
+	font-size: 18px;	
+	display: inline-block;
+	background-color: #e600e6;
+	color: #FFFFFF;
+}
+
+#player-stats-btn{
+	float: left;
+}
+
+#all-stats-btn{
+	float: right;
+}
+
+.stats, .stat-number{
+	padding-top: 10px;
+	font-size: 20px;
+	width: 70%;
+	display: inline-block;
+}
+
+.stat-number{
+	width: 30%;
+	font-weight: bold;
+}
+
 .modal-footer{
 	text-align: left;
 }
@@ -114,8 +167,22 @@ canvas{
 	font-size: 18px;
 	font-weight: bold;
 }
+#game-message-wrapper{
+	position: fixed;
+	width: 100%;
+	bottom: 20px;
+}
 
-
+#game-message{
+	display: table;
+	font-size: 20px;
+	border-radius: 5px;
+	padding: 5px 15px;
+	color: white;
+	background-color: #00e6e6;
+	margin: auto;
+	opacity: 0;
+}
 
 
 

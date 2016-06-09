@@ -13,6 +13,15 @@ var defaultOrbs = 1000;
 var worldWidth = 5000;
 var worldHeight = 5000;
 var tock;
+var routes = require('./routes/index');
+var bodyParser = require('body-parser');
+
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use('/', routes);
+
 
 
 server.listen(process.env.port || 3333);

@@ -31,6 +31,9 @@
 					<div id="sort-players" class="sort-option" ng-click="sortBy('playersAbsorbed')">Players</div>
 				</div>
 			</div>
+			<div id="game-message-wrapper">
+				<div id="game-message">{{gameMessage}}</div>
+			</div>
 		</div>
 		
 	</div>
@@ -49,11 +52,13 @@
 						<div class="modal-body">
 							<form class="name-form" ng-submit="login()">
 								<input id="name-input" class="text-input text-center form-control" type="text" name="name-input" ng-model="playerName" placeholder="Enter your name here" required>
-								<input id="password-input" class="text-input text-center form-control" type="text" name="password-input" ng-model="playerPassword" placeholder="Enter your password here" required>
-								<button id="play-button" type="submit" class="btn">Login</button>
+								<input type="password" style="display: none" name="">
+								<input id="password-input" class="text-input text-center form-control" type="password" name="password-input" ng-model="playerPassword" placeholder="Enter your password here" required>
+								<div class="text-center error-message" ng-show="errorMessage">{{errorMessage}}</div>
+								<button type="submit" class="btn play-button">Login</button>
 							</form>
 							<div class="text-center">or</div>
-							<button id="create-button" type="button" ng-click="createUser()" class="btn">Create User</button>
+							<button id="create-button" type="button" ng-click="gotoCreate()" class="btn">Create User</button>
 						</div>
 						<div class="modal-footer">
 							<div id="instructions">
@@ -83,14 +88,13 @@
 							<h2 class="modal-title text-center">Orb-Blitz</h2>
 						</div>
 						<div class="modal-body">
-							<form class="name-form" ng-submit="submitName()">
+							<form class="name-form" ng-submit="createUser()">
 								<input id="name-input" class="text-input text-center form-control" type="text" minlength="3" name="name-input" ng-model="playerName" placeholder="Enter your user name here" required>
 								<input id="password-input" class="text-input text-center form-control" type="password" minlength="6" name="password-input" ng-model="playerPassword" placeholder="Enter your password here" required>
 								<input id="password-input2" class="text-input text-center form-control" type="password" minlength="6" name="password-input2" ng-model="playerPassword2" placeholder="Confirm password" required>
-								<button id="play-button" type="submit" class="btn">Login</button>
+								<div class="text-center error-message" ng-show="errorMessage">{{errorMessage}}</div>
+								<button id="create-button" type="button" ng-click="createUser()" class="btn">Submit</button>
 							</form>
-							<div class="text-center">or</div>
-							<button id="create-button" type="button" ng-click="createUser()" class="btn">Create User</button>
 						</div>
 						<div class="modal-footer">
 							<div id="instructions">
@@ -120,8 +124,12 @@
 							<h2 class="modal-title text-center">Orb-Blitz</h2>
 						</div>
 						<div class="modal-body">
-							<h3>Hello {{playerName}}!</h3>
-							<button id="play-button" type="button" ng-click="startGame()" class="btn">Play Orb-Blitz!</button>
+							<h3 class="text-center">Hello {{playerName}}!</h3>
+							<button type="button" ng-click="startGame()" class="btn play-button">Play Orb-Blitz!</button>
+							<div class="stats-btn-wrapper">
+								<button id="player-stats-btn" type="button" ng-click="getPlayerStats()" class="btn stats-btn">See your stats</button>
+								<button id="all-stats-btn" type="button" ng-click="getAllStats()" class="btn stats-btn">See all stats</button>
+							</div>
 						</div>
 						<div class="modal-footer">
 							<div id="instructions">
@@ -136,7 +144,6 @@
 							</div>
 						</div>
 					</div>
-
 				</div>
 			</div>
 
@@ -154,10 +161,11 @@
 							<div class="player-stats">Players Absorbed: <span>{{playersAbsorbed}}</span></div>
 						</div>
 						<div class="modal-body">
-							<form class="name-form" ng-submit="submitName()">
-								<input id="name-input" class="text-center form-control" type="text" name="name-input" ng-model="playerName" placeholder="Enter your name here" required>
-								<button id="play-button" type="submit" class="btn">Respawn?</button>
-							</form>
+							<button type="button" ng-click="startGame()" class="btn play-button">Respawn?</button>
+							<div class="stats-btn-wrapper">
+								<button id="player-stats-btn" type="button" ng-click="getPlayerStats()" class="btn stats-btn">See your stats</button>
+								<button id="all-stats-btn" type="button" ng-click="getAllStats()" class="btn stats-btn">See all stats</button>
+							</div>
 						</div>
 						<div class="modal-footer">
 							<div id="instructions">
@@ -172,7 +180,73 @@
 							</div>
 						</div>
 					</div>
+				</div>
+			</div>
 
+<!-- Player Stats MODAL -->
+			<div id="playerModal" class="modal fade" role="dialog">
+				<div class="modal-dialog modal-sm">
+
+				<!-- Modal content-->
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h2 class="modal-title text-center">Orb-Blitz</h2>
+						</div>
+						<div class="modal-body">
+							<h3 class="">{{playerName}}'s Stats:</h3>
+							<div class="stats">High Score:</div><div class="stat-number">{{highScore}}</div>
+							<div class="stats">Most Orbs Absorbed:</div><div class="stat-number">{{mostOrbsAbsorbed}}</div>
+							<div class="stats">Most Players Absorbed:</div><div class="stat-number">{{mostPlayersAbsorbed}}</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" ng-click="startGame()" class="btn play-button">Play Orb-Blitz!</button>
+							<div class="btn-wrapper">
+								<button id="playerStats-all-btn" type="button" ng-click="getAllStats()" class="btn stats-btn">See all stats</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+<!-- All Stats MODAL -->
+			<div id="allModal" class="modal fade" role="dialog">
+				<div class="modal-dialog modal-lg">
+
+				<!-- Modal content-->
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h2 class="modal-title text-center">Orb-Blitz</h2>
+						</div>
+						<div class="modal-body">
+							<table class="table">
+								<thead>
+									<tr>
+										<th>Player Name</th>
+										<th>High Score</th>
+										<th>Most Orbs Abosrbed</th>
+										<th>Most Players Absorbed</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr ng-repeat="player in players|orderBy: '-highScore'|limitTo:10 track by $index">
+										<td>{{player.playerName}}</td>
+										<td>{{player.highScore}}</td>
+										<td>{{player.mostOrbs}}</td>
+										<td>{{player.mostPlayers}}</td>
+									</tr>
+								</tbody>
+							</table>
+
+						</div>
+						<div class="modal-footer">
+							<button type="button" ng-click="startGame()" class="btn play-button">Play Orb-Blitz!</button>
+							<div class="btn-wrapper">
+								<button id="playerStats-player-btn" type="button" ng-click="getPlayerStats()" class="btn stats-btn">See your stats</button>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 

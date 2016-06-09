@@ -1,5 +1,5 @@
 var app = angular.module("orbApp", []);
-app.controller("orbController", function($scope){
+app.controller("orbController", function($scope, $http){
 	var player = {};
 	var orbs;
 	var players;
@@ -22,23 +22,25 @@ app.controller("orbController", function($scope){
 
 	$scope.score = 0;
 	$scope.sortOrder = "-score";
+	$scope.errorMessage = false;
 
 	$(window).load(function(){
 		$("#loginModal").modal("show");
 	});
 
+//API CALLS
 	$scope.login = function(event){
-		event.preventDefault();
 		$http.post(apiPath + "login",{
 			userName: $scope.playerName,
-			password: $scope.playerPassword
+			playerPassword: $scope.playerPassword
 		}).then(function successCallback(response){
 			if(response.data.success == "found"){
 				$scope.errorMessage = false;
 				player.name = $scope.playerName;
 				$(".modal").modal("hide");
 				$("#spawnModal").modal("show");
-			}else if(response.data.failire == "noUser" || response.data.failure == "badPassword"){
+			}else if(response.data.failure == "noUser" || response.data.failure == "badPassword"){
+				console.log(response.data.failure);
 				$scope.errorMessage = "Your user name or password is incorrect. Please try again";
 			} 
 		}, function errorCallback(response){
@@ -46,23 +48,28 @@ app.controller("orbController", function($scope){
 		});
 	}
 
+	$scope.gotoCreate = function(){
+		$(".modal").modal("hide");
+		$("#createModal").modal("show");
+	}
+
 	$scope.createUser = function(event){
-		event.preventDefault();
+		$scope.errorMessage = false;
 		if($scope.playerPassword != $scope.playerPassword2){
-			$scope.errorMessageCreate = "Your passwords don't match.";
+			$scope.errorMessage = "Your passwords don't match. Try again.";
 		}else{
-			$scope.errorMessageCreate = false;
+			$scope.errorMessage = false;
 			$http.post(apiPath + "create",{
 				userName: $scope.playerName,
-				password: $scope.playerPassword,
+				password: $scope.playerPassword
 			}).then(function successCallback(response){
 				if(response.data.success == "created"){
-					$scope.errorMessageCreate = false;
+					$scope.errorMessage = false;
 					player.name = $scope.playerName;
 					$(".modal").modal("hide");
 					$("#spawnModal").modal("show");
-				}else if(response.data.failire == "taken"){
-					$scope.errorMessageCreate = "Sorry, user name already taken. Please try again.";
+				}else if(response.data.failure == "taken"){
+					$scope.errorMessage = "Sorry, user name already taken. Please try again.";
 				}
 			}, function errorCallback(response){
 				console.log(response.status);
@@ -70,7 +77,59 @@ app.controller("orbController", function($scope){
 		}
 	}
 
-	$scope.startGame = function{
+	$scope.getPlayerStats = function(){
+		$http.post(apiPath + "playerStats",{
+			userName: $scope.playerName
+		}).then(function successCallback(response){
+			if(response.data){
+				$scope.highScore = response.data.highScore
+				$scope.mostOrbsAbsorbed = response.data.mostOrbs 
+				$scope.mostPlayersAbsorbed = response.data.mostPlayers
+				$(".modal").modal("hide");
+				$("#playerModal").modal("show");
+			}
+		}, function errorCallback(response){
+				console.log(response.status);
+		});
+	}
+
+	$scope.getAllStats = function(){
+		$http.post(apiPath + "allStats",{
+		}).then(function successCallback(response){
+			if(response.data){
+				console.log(response.data);
+				$scope.players = response.data.users;
+				$(".modal").modal("hide");
+				$("#allModal").modal("show");
+			}
+		}, function errorCallback(response){
+				console.log(response.status);
+		});
+	}
+
+
+
+	function updateStats(){
+		$http.post(apiPath + "update",{
+			userName: $scope.playerName,
+			score: $scope.score,
+			orbsAbsorbed: $scope.orbsAbsorbed,
+			playersAbsorbed: $scope.playersAbsorbed
+		}).then(function successCallback(response){
+			if(response.data.success == "update"){
+				console.log("Updated Stats");
+			}else if(response.data.failire == "failedUpdate"){
+				console.log("Failed to update database.");
+			}
+		}, function errorCallback(response){
+			console.log(response.status);
+		});
+	}
+
+
+//END API CALLS
+
+	$scope.startGame = function(){
 		$(".modal").modal("hide");
 		$(".hiddenOnStart").removeAttr("hidden");
 		if(player.name){
@@ -89,7 +148,6 @@ app.controller("orbController", function($scope){
 		player = data.init;
 		orbs = data.orbs;
 		players = data.players;
-		console.log(player.id);
 		tickInterval = setInterval(function(){
 			tick();
 		}, fps);
@@ -110,7 +168,6 @@ app.controller("orbController", function($scope){
 	}
 
 	function leaderCheck(){
-		console.log($scope.sortOrder);
 		$scope.players = players;
 	}
 
@@ -136,7 +193,6 @@ app.controller("orbController", function($scope){
 	});
 
 	socket.on("death", function(data){
-		console.log(data);
 		if(player.id == data.died.id){	
 			$(".hiddenOnStart").attr("hidden", "hidden");
 			player.alive = false;
@@ -149,7 +205,13 @@ app.controller("orbController", function($scope){
 				$scope.orbsAbsorbed = data.died.orbsAbsorbed;
 				$scope.playersAbsorbed = data.died.playersAbsorbed;
 			});
-			console.log($scope.killer);
+			updateStats();
+		}else{
+//TO DO- add pop up notification
+			console.log("player killed other player");
+			$scope.gameMessage = "Player " + data.died.name + " killed by " + data.killedBy;
+			$("#game-message").css({opacity: 0.7});
+			$("#game-message").fadeTo(5000, 0);
 		}
 	});
 

@@ -6,6 +6,7 @@ var User = new Schema({
 	// 	ref: "players"
 	// },
 	playerName: String,
+	password: String,
 	highScore: Number,
 	mostOrbs: Number,
 	mostPlayers: Number
@@ -13,4 +14,4 @@ var User = new Schema({
 	// bestTeamScore: Number
 });
 
-module.exports = mongoose.model("Player", playerSchema);
+module.exports = mongoose.model("Player", User);
