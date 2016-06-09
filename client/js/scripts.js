@@ -6,6 +6,7 @@ app.controller("orbController", function($scope){
 	var wHeight = $(window).height();
 	var wWidth = $(window).width();
 	var tickInterval;
+	var leaderInterval;
 	var fps = 1000/30;
 
 	var canvas = document.getElementById("the-canvas");
@@ -15,23 +16,32 @@ app.controller("orbController", function($scope){
 
 	var socket = io.connect();
 
+	$scope.score = 0;
+	$scope.sortOrder = "-score";
+
 	$(window).load(function(){
-		$("#spawnModal").modal("show");
+		$("#loginModal").modal("show");
 	});
-
-
-	$scope.submitName = function(){
-		player.name = $scope.playerName
-	}
 
 	$(".name-form").submit(function(event){
 		event.preventDefault();
 		player.name = $("#name-input").val();
 		$(".modal").modal("hide");
+		$(".hiddenOnStart").removeAttr("hidden");
 		if(player.name){
 			init();
 		}	
 	});
+
+	$scope.createUser = function(){
+
+	}
+
+	$scope.startGame = function(){
+		player.name = $scope.playerName
+	}
+
+
 
 	// SOCKET.IO STUFF
 	function init(){
@@ -48,12 +58,14 @@ app.controller("orbController", function($scope){
 		tickInterval = setInterval(function(){
 			tick();
 		}, fps);
+		leaderInterval = setInterval(function(){
+			leaderCheck();
+		}, 2000);
 		draw();
 	});
 
 	function tick(){
 		if(player.alive){
-			console.log(player.alive);
 			socket.emit("tick",{
 				playerID: player.id,
 				playerXVector: player.xVector,
@@ -62,22 +74,46 @@ app.controller("orbController", function($scope){
 		}
 	}
 
+	function leaderCheck(){
+		console.log($scope.sortOrder);
+		$scope.players = players;
+	}
+
+	$scope.sortBy = function(sortItem){
+		$scope.sortOrder = "-" + sortItem;
+		$(".sort-option").removeClass("active");
+		if(sortItem == "score"){
+			$("#sort-score").addClass("active");
+		}else if(sortItem == "orbsAbsorbed"){
+			$("#sort-orbs").addClass("active");
+		}else if(sortItem == "playersAbsorbed"){
+			$("#sort-players").addClass("active");
+		}
+	}
+
 	socket.on("tock", function(data){
 		players = data.players;
 		orbs = data.orbs;
 		player = data.player;
+		$scope.$apply(function(){
+			$scope.score = player.score;
+		});
 	});
 
 	socket.on("death", function(data){
 		console.log(data);
-		if(player.id == data.died){	
-			
+		if(player.id == data.died.id){	
+			$(".hiddenOnStart").attr("hidden", "hidden");
 			player.alive = false;
 			clearInterval(tickInterval);
+			clearInterval(leaderInterval);
 			$("#deathModal").modal("show");
 			$scope.$apply(function(){
 				$scope.killer = data.killedBy;
-			})
+				$scope.score = data.died.score;
+				$scope.orbsAbsorbed = data.died.orbsAbsorbed;
+				$scope.playersAbsorbed = data.died.playersAbsorbed;
+			});
 			console.log($scope.killer);
 		}
 	});

@@ -67,6 +67,9 @@ io.sockets.on("connect", function(socket){
 		this.worldHeight = worldHeight;
 		this.team = 0; // TO DO set random team set.
 		this.alive = true;
+		this.score = 0;
+		this.orbsAbsorbed = 0;
+		this.playersAbsorbed = 0;
 	}
 
 	socket.on("tick", function(data){
@@ -99,6 +102,7 @@ io.sockets.on("connect", function(socket){
 	});
 	
 	function checkForCollisions(){
+	//ORB COLLISIONS
 		for(var j = 0; j < orbs.length; j++){
 		// AABB Test(square)
 			if(player.locX + player.radius + orbs[j].radius > orbs[j].locX 
@@ -111,6 +115,9 @@ io.sockets.on("connect", function(socket){
 						((player.locY - orbs[j].locY) * (player.locY - orbs[j].locY))	
 						);
 					if(distance < player.radius + orbs[j].radius){
+				//COLLISION!!!
+						player.score += 1;
+						player.orbsAbsorbed += 1;
 						player.color = orbs[j].color;
 						if(player.zoom > 1){
 							player.zoom -= .001;
@@ -128,7 +135,7 @@ io.sockets.on("connect", function(socket){
 					}
 			}
 		}
-			
+	//PLAYER COLLISIONS	
 			for(var k = 0; k < players.length; k++){
 				if(player.id != players[k].id){
 				// AABB Test
@@ -142,12 +149,15 @@ io.sockets.on("connect", function(socket){
 							((player.locY - players[k].locY) * (player.locY - players[k].locY))	
 							);
 						if(distance < player.radius + players[k].radius){
+					//COLLISION!!
 							if(player.radius > players[k].radius){
 						// ENEMY DEATH
+								player.score += (players[k].score + 10);
+								player.playersAbsorbed += 1;
 								players[k].alive = false;
 								io.sockets.emit("death", {
 									message: "Bot Killed",
-									died: players[k].id,
+									died: players[k],
 									killedBy: player.name,
 								});
 								player.radius += (players[k].radius * 0.25)
@@ -157,10 +167,12 @@ io.sockets.on("connect", function(socket){
 								players.splice(k, 1);
 							}else if(player.radius < players[k].radius){
 						// Player DEATH
+								players[k].score += (player.score + 10);
+								players[k].playersAbsorbed += 1;
 								player.alive = false;
 								io.sockets.emit("death", {
 									message: "PLAYER DEATH",
-									died: player.id,
+									died: player,
 									killedBy: players[k].name,
 								});								
 								players[k].radius += (player.radius * 0.25)
