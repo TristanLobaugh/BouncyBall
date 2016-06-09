@@ -9,6 +9,10 @@ app.controller("orbController", function($scope){
 	var leaderInterval;
 	var fps = 1000/30;
 
+//FOR AWS
+	// var apiPath = "http://tristanlobaugh.com:3333/";
+	var apiPath = "http://localhost:3333/";
+
 	var canvas = document.getElementById("the-canvas");
 	var context = canvas.getContext("2d");
 	canvas.width = wWidth;
@@ -23,27 +27,58 @@ app.controller("orbController", function($scope){
 		$("#loginModal").modal("show");
 	});
 
-	$(".name-form").submit(function(event){
+	$scope.login = function(event){
 		event.preventDefault();
-		player.name = $("#name-input").val();
+		$http.post(apiPath + "login",{
+			userName: $scope.playerName,
+			password: $scope.playerPassword
+		}).then(function successCallback(response){
+			if(response.data.success == "found"){
+				$scope.errorMessage = false;
+				player.name = $scope.playerName;
+				$(".modal").modal("hide");
+				$("#spawnModal").modal("show");
+			}else if(response.data.failire == "noUser" || response.data.failure == "badPassword"){
+				$scope.errorMessage = "Your user name or password is incorrect. Please try again";
+			} 
+		}, function errorCallback(response){
+				console.log(response.status);
+		});
+	}
+
+	$scope.createUser = function(event){
+		event.preventDefault();
+		if($scope.playerPassword != $scope.playerPassword2){
+			$scope.errorMessageCreate = "Your passwords don't match.";
+		}else{
+			$scope.errorMessageCreate = false;
+			$http.post(apiPath + "create",{
+				userName: $scope.playerName,
+				password: $scope.playerPassword,
+			}).then(function successCallback(response){
+				if(response.data.success == "created"){
+					$scope.errorMessageCreate = false;
+					player.name = $scope.playerName;
+					$(".modal").modal("hide");
+					$("#spawnModal").modal("show");
+				}else if(response.data.failire == "taken"){
+					$scope.errorMessageCreate = "Sorry, user name already taken. Please try again.";
+				}
+			}, function errorCallback(response){
+				console.log(response.status);
+			});
+		}
+	}
+
+	$scope.startGame = function{
 		$(".modal").modal("hide");
 		$(".hiddenOnStart").removeAttr("hidden");
 		if(player.name){
 			init();
-		}	
-	});
-
-	$scope.createUser = function(){
-
+		}			
 	}
-
-	$scope.startGame = function(){
-		player.name = $scope.playerName
-	}
-
-
-
-	// SOCKET.IO STUFF
+		
+// SOCKET.IO STUFF
 	function init(){
 		socket.emit("init",{
 			playerName: player.name

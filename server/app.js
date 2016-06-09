@@ -7,12 +7,7 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var routes = require('./routes/index');
 var users = require('./routes/users');
-var io = require("socket.io")
 var app = express();
-
-var mysocket = io();
-app.io = mysocket;
-
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "127.0.0.1");
@@ -65,6 +60,5 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-
 
 module.exports = app;

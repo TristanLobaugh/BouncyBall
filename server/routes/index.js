@@ -1,30 +1,90 @@
 var express = require('express');
 var router = express.Router();
-// var myscoket = require('')
+var bcrypt = require("bcrypt-nodejs");
+var mongoUrl = "mongodb://localhost:27017/orb-blitz";
 var mongoose = require('mongoose');
-var connection = mongoose.connect('mongodb://localhost:27017/bounce');
-var Bounce = require('../models/bounce');
+var User = require('../models/players');
 var mysocket = require("../server");
+mongoose.connect(mongoUrl);
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+router.post("/login", function(req, res, next){
+	User.findOne(
+		{playerName: req.body.userName}, function(err, doc){
+			if(doc == null){
+				res,json({failure: "noUser"});
+			}else{
+				var passwordMatch = bcrypt.compareSync(req.body.playerPassword, doc.password);
+				if(passwordMatch){
+					res.json({
+						success: "found",
+					});
+				}else{
+					res.json({failure: "badPassword"});
+				}
+			}
+		}
+	);	
 });
 
-router.get('/connect', function(req, res){
-		io.sockets.on("connect", function(socket){
-			console.log(socket);
-		socket.on("message_to_server", function(data){
-			console.log(data);
-			io.sockets.emit("message_to_client",{
-				message: "Message Recieved, player " + data.id + " killed by player " + data.killedBy + " when he had radius of " + data.radius + "."  
-			});
-		});
+router.post("/create", function(req, res, next){
+	User.findOne(
+	{playerName: req.body.userName}, function(err, doc){
+			if(doc == null){
+				var newUser = new User({
+					playerName: req.body.userName,
+					password: bcrypt.hashSync(req.body.password),
+				});
+				newUser.save();
+				res.json({
+					success: "created"
+				});
+			}else{
+				res.json({failure: "taken"});
+			}
+		}
+	);
+});
+
+router.post("/update", function(req, res, next){
+	User.findOne(
+		{playerName: req.body.userName}, function(err, doc){
+				var highScore = (doc.highScore < req.body.score) ? req.body.score : doc.highScore;
+				var mostOrbs = (doc.mostOrbs < req.body.orbsAbsorbed) ? req.body.orbsAbsorbed : doc.mostOrbs;
+				var mostPlayers = (doc.mostPlayers < req.body.playersAbsorbed) ? req.body.playersAbsorbed : doc.mostPlayers;
+		}
+	);
+	User.update(
+		{playerName: req.body.userName},
+		{
+				highScore: highScore,
+				mostOrbs: mostOrbs,
+				mostPlayers: mostPlayers
+		},
+		{multi: true},
+		function(err, numberAffected){
+			if(numberAffected.ok == 1){
+				res.json({success: "update"});
+			}else{
+				res.json({failure: "failedupdate"});
+			}
+		}
+	);
+});
+
+router.get("/playerStats", function(req, res, next){
+	User.findOne(
+		{playerName: req.body.userName}, function(err, doc){
+			res.json(doc);
+		}
+	);
+});
+
+router.get("/allStats", function(req, res, next){
+	User.find({}, function(err, users){
+		res.json(users);
 	});
-  // console.log("getting");
-  // Bounce.find({}, function(err, data){
-  //   res.json(data);
-  });
+});
+
 
 
 module.exports = router;

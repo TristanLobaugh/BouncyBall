@@ -1,14 +1,16 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var playerSchema = new Schema({
+var User = new Schema({
 	// "_id": {
 	// 	type: Schema.ObjectId,
 	// 	ref: "players"
 	// },
-	name: String,
-	teamName: String,
-	bestIndvScore: Number,
-	bestTeamScore: Number
+	playerName: String,
+	highScore: Number,
+	mostOrbs: Number,
+	mostPlayers: Number
+	// teamName: String,
+	// bestTeamScore: Number
 });
 
 module.exports = mongoose.model("Player", playerSchema);

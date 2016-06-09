@@ -47,7 +47,7 @@
 							<h2 class="modal-title text-center">Orb-Blitz</h2>
 						</div>
 						<div class="modal-body">
-							<form class="name-form" ng-submit="submitName()">
+							<form class="name-form" ng-submit="login()">
 								<input id="name-input" class="text-input text-center form-control" type="text" name="name-input" ng-model="playerName" placeholder="Enter your name here" required>
 								<input id="password-input" class="text-input text-center form-control" type="text" name="password-input" ng-model="playerPassword" placeholder="Enter your password here" required>
 								<button id="play-button" type="submit" class="btn">Login</button>
@@ -120,7 +120,8 @@
 							<h2 class="modal-title text-center">Orb-Blitz</h2>
 						</div>
 						<div class="modal-body">
-								<button id="play-button" type="button" ng-click="startGame()" class="btn">Play Orb-Blitz!</button>
+							<h3>Hello {{playerName}}!</h3>
+							<button id="play-button" type="button" ng-click="startGame()" class="btn">Play Orb-Blitz!</button>
 						</div>
 						<div class="modal-footer">
 							<div id="instructions">
