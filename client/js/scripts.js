@@ -187,6 +187,7 @@ app.controller("orbController", function($scope, $http){
 	}
 
 	socket.on("tock", function(data){
+		console.log(data.player.name)
 		players = data.players;
 		orbs = data.orbs;
 		player = data.player;
@@ -196,6 +197,7 @@ app.controller("orbController", function($scope, $http){
 	});
 
 	socket.on("death", function(data){
+		console.log(data.died.name);
 		if(player.id == data.died.id){	
 			$(".hiddenOnStart").attr("hidden", "hidden");
 			player.alive = false;
