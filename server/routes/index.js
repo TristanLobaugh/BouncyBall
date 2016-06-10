@@ -20,6 +20,19 @@ router.post("/login", function(req, res, next){
 			}else{
 				var passwordMatch = bcrypt.compareSync(req.body.playerPassword, doc.password);
 				if(passwordMatch){
+					for(var i = 0; i < connections.length; i++){
+						if(connections[i].loggedIn == req.body.userName){
+							console.log(connections[i].loggedIn + " Already logged in")
+							res.json({failure: "loggedIn"});
+							return;
+						}
+					}
+					for(var i = 0; i < connections.length; i++){
+						console.log(connections[i].conn.id);
+						if(connections[i].conn.id == req.body.socketID){
+							connections[i].loggedIn = req.body.userName;
+						}
+					}
 					res.json({
 						success: "found",
 					});

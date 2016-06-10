@@ -2,7 +2,7 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
-var connections = [];
+global.connections = [];
 var players = [];
 var orbs = [];
 var scoreboard = [];
@@ -38,15 +38,16 @@ io.sockets.on("connect", function(socket){
 
 	connections.push(socket);
 	console.log('Connected: %s sockets connected', connections.length);
-
+//Disconnect
 	socket.on('disconnect', function(data){
-		connections.splice(connections.indexOf(socket), 1);
-		console.log('Disconnected: %s sockets connected', connections.length);
+		console.log(players);
 		for(var i = 0; i < players.length; i++){
-			if(players[i].id == (socket.id).substring(2)){
+			if(players[i].id == socket.conn.id){				
 				players.splice(i, 1);
 			}
 		}
+		connections.splice(connections.indexOf(socket), 1);
+		console.log('Disconnected: %s sockets connected', connections.length);
 	});	
 
 	socket.on("init", function(data){
@@ -62,7 +63,7 @@ io.sockets.on("connect", function(socket){
 		});
 	}
 	function Player(playerName){
-		this.id = (socket.id).substring(2);
+		this.id = socket.conn.id;
 		this.name = playerName;
 		this.locX = Math.floor((Math.random()*worldWidth) + 10); 
 		this.locY = Math.floor((Math.random()*worldHeight) + 10);
@@ -165,7 +166,7 @@ io.sockets.on("connect", function(socket){
 								player.playersAbsorbed += 1;
 								players[k].alive = false;
 								io.sockets.emit("death", {
-									message: "Bot Killed",
+									message: "Player Killed",
 									died: players[k],
 									killedBy: player.name,
 								});

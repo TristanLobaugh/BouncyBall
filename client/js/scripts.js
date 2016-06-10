@@ -30,7 +30,9 @@ app.controller("orbController", function($scope, $http){
 
 //API CALLS
 	$scope.login = function(event){
+		console.log(socket.id);
 		$http.post(apiPath + "login",{
+			socketID: socket.id,
 			userName: $scope.playerName,
 			playerPassword: $scope.playerPassword
 		}).then(function successCallback(response){
@@ -40,9 +42,10 @@ app.controller("orbController", function($scope, $http){
 				$(".modal").modal("hide");
 				$("#spawnModal").modal("show");
 			}else if(response.data.failure == "noUser" || response.data.failure == "badPassword"){
-				console.log(response.data.failure);
 				$scope.errorMessage = "Your user name or password is incorrect. Please try again";
-			} 
+			}else if(response.data.failure == "loggedIn"){
+				$scope.errorMessage = "Sorry, this user is already logged in.";
+			}
 		}, function errorCallback(response){
 				console.log(response.status);
 		});
@@ -206,12 +209,16 @@ app.controller("orbController", function($scope, $http){
 				$scope.playersAbsorbed = data.died.playersAbsorbed;
 			});
 			updateStats();
-		}else{
-//TO DO- add pop up notification
-			console.log("player killed other player");
-			$scope.gameMessage = "Player " + data.died.name + " killed by " + data.killedBy;
+		}else if(player.name == data.killedBy){
+			$scope.gameMessage = "You absorbed " + data.died.name;
+			$("#game-message").css({"background-color": "#e600e6"});
 			$("#game-message").css({opacity: 0.7});
 			$("#game-message").fadeTo(5000, 0);
+		}else{
+			$scope.gameMessage = "Player " + data.died.name + " absorbed by " + data.killedBy;
+			$("#game-message").css({"background-color": "#00e6e6"});
+			$("#game-message").css({opacity: 0.7});
+			$("#game-message").fadeTo(6000, 0);
 		}
 	});
 
