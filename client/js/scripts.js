@@ -30,7 +30,6 @@ app.controller("orbController", function($scope, $http){
 
 //API CALLS
 	$scope.login = function(event){
-		console.log(socket.id);
 		$http.post(apiPath + "login",{
 			socketID: socket.id,
 			userName: $scope.playerName,
@@ -52,6 +51,7 @@ app.controller("orbController", function($scope, $http){
 	}
 
 	$scope.gotoCreate = function(){
+		$scope.errorMessage = false;
 		$(".modal").modal("hide");
 		$("#createModal").modal("show");
 	}
@@ -100,7 +100,6 @@ app.controller("orbController", function($scope, $http){
 		$http.post(apiPath + "allStats",{
 		}).then(function successCallback(response){
 			if(response.data){
-				console.log(response.data);
 				$scope.players = response.data.users;
 				$(".modal").modal("hide");
 				$("#allModal").modal("show");
@@ -120,7 +119,6 @@ app.controller("orbController", function($scope, $http){
 			playersAbsorbed: $scope.playersAbsorbed
 		}).then(function successCallback(response){
 			if(response.data.success == "update"){
-				console.log("Updated Stats");
 			}else if(response.data.failire == "failedUpdate"){
 				console.log("Failed to update database.");
 			}
@@ -187,7 +185,6 @@ app.controller("orbController", function($scope, $http){
 	}
 
 	socket.on("tock", function(data){
-		console.log(data.player.name)
 		players = data.players;
 		orbs = data.orbs;
 		player = data.player;
@@ -197,7 +194,6 @@ app.controller("orbController", function($scope, $http){
 	});
 
 	socket.on("death", function(data){
-		console.log(data.died.name);
 		if(player.id == data.died.id){	
 			$(".hiddenOnStart").attr("hidden", "hidden");
 			player.alive = false;

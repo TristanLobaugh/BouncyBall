@@ -28,7 +28,6 @@ router.post("/login", function(req, res, next){
 						}
 					}
 					for(var i = 0; i < connections.length; i++){
-						console.log(connections[i].conn.id);
 						if(connections[i].conn.id == req.body.socketID){
 							connections[i].loggedIn = req.body.userName;
 						}
@@ -70,11 +69,8 @@ router.post("/update", function(req, res, next){
 	User.findOne(
 		{playerName: req.body.userName}, function(err, doc){
 			highScore = (doc.highScore < req.body.score) ? req.body.score : doc.highScore;
-			console.log(highScore);
 			mostOrbs = (doc.mostOrbs < req.body.orbsAbsorbed) ? req.body.orbsAbsorbed : doc.mostOrbs;
-			console.log(mostOrbs);
 			mostPlayers = (doc.mostPlayers < req.body.playersAbsorbed) ? req.body.playersAbsorbed : doc.mostPlayers;
-			console.log(mostPlayers);
 			User.update(
 				{playerName: req.body.userName},
 				{
@@ -110,7 +106,6 @@ router.post("/playerStats", function(req, res, next){
 
 router.post("/allStats", function(req, res, next){
 	User.find({}, function(err, users){
-		console.log(users);
 		res.json({users});
 	});
 });

@@ -40,7 +40,6 @@ io.sockets.on("connect", function(socket){
 	console.log('Connected: %s sockets connected', connections.length);
 //Disconnect
 	socket.on('disconnect', function(data){
-		console.log(players);
 		for(var i = 0; i < players.length; i++){
 			if(players[i].id == socket.conn.id){				
 				players.splice(i, 1);
@@ -94,13 +93,10 @@ io.sockets.on("connect", function(socket){
 			movePlayer();
 			function movePlayer(){
 				if(((player.locX < 5 && player.xVector < 0) || (player.locX > player.worldWidth) && (player.xVector > 0)) && ((player.locY < 5 && player.yVector > 0) || (player.locY > player.worldHeight) && (player.yVector < 0))){
-					// console.log("can't move X or Y");
 				}else if((player.locX < 5 && player.xVector < 0) || (player.locX > player.worldWidth) && (player.xVector > 0)){
 					player.locY -= player.speed * player.yVector;
-					// console.log("cant move X");
 				}else if((player.locY < 5 && player.yVector > 0) || (player.locY > player.worldHeight) && (player.yVector < 0)){
 					player.locX += player.speed * player.xVector;
-					// console.log("cant move Y");
 				}else{
 					player.locX += player.speed * player.xVector;
 					player.locY -= player.speed * player.yVector;
