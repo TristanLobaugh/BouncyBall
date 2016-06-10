@@ -192,22 +192,21 @@ io.sockets.on("connect", function(socket){
 										players.splice(i, 1);
 									}
 								}
-								
 							}
 						}
 					}
 				}
 			}
 		for(var i = 0; i < players.length; i++){
-				if(players[i].id == player.id){
-					players[i] = player;
-				}
+			if(players[i].id == player.id){
+				players[i] = player;
+				socket.emit("tock",{
+					players: players,
+					orbs: orbs,
+					player: player
+				});
 			}
-		socket.emit("tock",{
-			players: players,
-			orbs: orbs,
-			player: player
-		});
+		}
 	}
 
 
