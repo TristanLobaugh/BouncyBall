@@ -9,7 +9,7 @@
 
 	<div id="container">
 		<div id="game-field" class="col-sm-12">
-			<canvas id="the-canvas" style="background: url('img/starmap_copy.jpg')">
+			<canvas id="the-canvas" style="background: url('img/starfield.jpg')">
 				<!-- our drawing will go here -->
 			</canvas>
 			<div id="score-wrapper" class="hiddenOnStart" hidden>
@@ -109,7 +109,6 @@
 							</div>
 						</div>
 					</div>
-
 				</div>
 			</div>
 
@@ -125,10 +124,13 @@
 						</div>
 						<div class="modal-body">
 							<h3 class="text-center">Hello {{playerName}}!</h3>
-							<button type="button" ng-click="startGame()" class="btn play-button">Play Orb-Blitz!</button>
+							<div class="play-btn-wrapper">
+								<button id="join-team-btn" type="button" ng-click="gotoJoinTeam()" class="btn play-button">Join a Team!</button>
+								<button id="play-solo-btn" type="button" ng-click="startGame()" class="btn play-button">Play Solo!</button>
+							</div>
 							<div class="stats-btn-wrapper">
-								<button id="player-stats-btn" type="button" ng-click="getPlayerStats()" class="btn stats-btn">See your stats</button>
-								<button id="all-stats-btn" type="button" ng-click="getAllStats()" class="btn stats-btn">See all stats</button>
+								<button type="button" ng-click="getPlayerStats()" class="btn stats-btn player-stats-btn">See your stats</button>
+								<button type="button" ng-click="getAllStats()" class="btn stats-btn all-stats-btn">See all stats</button>
 							</div>
 						</div>
 						<div class="modal-footer">
@@ -146,6 +148,48 @@
 					</div>
 				</div>
 			</div>
+
+<!-- JOIN TEAM MODAL -->
+			<div id="joinModal" class="modal fade" role="dialog">
+				<div class="modal-dialog modal-sm">
+
+				<!-- Modal content-->
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h2 class="modal-title text-center">Orb-Blitz</h2>
+						</div>
+						<div class="modal-body">
+							<h3 class="text-center">Hello {{playerName}}!</h3>
+							<h2 class="text-center error-message" ng-show="errorMessage">{{errorMessage}}</h2>
+							<ol id="team-list">
+								<li class="teams" ng-repeat="team in teams track by $index">
+									<button ng-click="joinTeam($index)" class="btn join-button">Join and Play!</button>
+									<span class="team">{{team.name}} - Current Players: {{team.players.length}}</span>
+								</li>
+							</ol>
+							<input ng-show="creatingTeam" id="team-input" class="text-input text-center" type="text" minlength="3" name="name-input" ng-model="teamName" placeholder="Enter your team name here"  required>
+							<div class="play-btn-wrapper">
+								<button id="add-team-btn" ng-hide="addingTeam" type="button" ng-click="addTeam()" class="btn play-button">Add a Team!</button>
+								<button ng-show="creatingTeam" id="create-team-btn" type="button" ng-click="createTeam()" class="btn play-button">Create Team!</button>
+								<button id="create-play-solo-btn" type="button" ng-click="startGame()" class="btn play-button">Play Solo!</button>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<div id="instructions">
+								<label id="how-to-play">How to play:</label>
+								<ul>
+									<li>Move your mouse on the screen to move your character.</li>
+									<li>Absorb orbs by running over them in order to grow your character.</li>
+									<li>The larger you get the slower you are.</li>
+									<li>Objective: Absorb other players to get even larger but not lose speed.</li>
+									<li>The larger player absorbs the smaller player.</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>			
 
 <!-- DEATH MODAL -->
 			<div id="deathModal" class="modal fade" role="dialog">

@@ -3,6 +3,7 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 global.connections = [];
+var teams = [];
 var players = [];
 var orbs = [];
 var scoreboard = [];
@@ -49,19 +50,40 @@ io.sockets.on("connect", function(socket){
 		console.log('Disconnected: %s sockets connected', connections.length);
 	});	
 
-	socket.on("init", function(data){
-		newPlayer(data.playerName);
-	})
+	socket.on("getTeams", function(data){
+		console.log(data.playerName + " is looking for teams.")
+		io.sockets.emit("returnTeams", {
+			teams: teams
+		});
+	});
 
-	function newPlayer(playerName){
-		players.push(new Player(playerName));
+	socket.on("makeTeam", function(data){
+		console.log(data.playerName + " makeing " + data.teamName + " team.");
+		teams.push({
+					name: data.teamName,
+					players: []
+					});
+		io.sockets.emit("returnTeams", {
+			teams: teams
+		})
+	});
+
+	socket.on("init", function(data){
+		newPlayer(data.playerName, data.team);
+	});
+
+	function newPlayer(playerName, team){
+		players.push(new Player(playerName, team));
+		if(team !== false){
+			teams[team].players.push(players[players.length-1]);
+		}
 		socket.emit("init_return",{
 			init: players[players.length-1],
 			orbs: orbs,
 			players: players
 		});
 	}
-	function Player(playerName){
+	function Player(playerName, team){
 		this.id = socket.conn.id;
 		this.name = playerName;
 		this.locX = Math.floor((Math.random()*worldWidth) + 10); 
@@ -74,7 +96,7 @@ io.sockets.on("connect", function(socket){
 		this.yVector = 0;
 		this.worldWidth = worldWidth;
 		this.worldHeight = worldHeight;
-		this.team = 0; // TO DO set random team set.
+		this.team = team;
 		this.alive = true;
 		this.score = 0;
 		this.orbsAbsorbed = 0;
@@ -212,6 +234,8 @@ io.sockets.on("connect", function(socket){
 
 // Starting a new game
 function initGame(){
+	players = [];
+	teams = [];
 	orbs = [];
 	createOrbs(defaultOrbs);
 }

@@ -10,8 +10,8 @@ app.controller("orbController", function($scope, $http){
 	var fps = 1000/30;
 
 //FOR AWS
-	var apiPath = "http://tristanlobaugh.com:3333/";
-	// var apiPath = "http://localhost:3333/";
+	// var apiPath = "http://tristanlobaugh.com:3333/";
+	var apiPath = "http://localhost:3333/";
 
 	var canvas = document.getElementById("the-canvas");
 	var context = canvas.getContext("2d");
@@ -54,6 +54,36 @@ app.controller("orbController", function($scope, $http){
 		$scope.errorMessage = false;
 		$(".modal").modal("hide");
 		$("#createModal").modal("show");
+	}
+
+	$scope.gotoJoinTeam = function(){
+		getTeams();
+		$scope.errorMessage = false;
+		$(".modal").modal("hide");
+		$("#joinModal").modal("show");
+	}
+
+	$scope.addTeam = function(){
+		$scope.errorMessage = false;
+		$scope.addingTeam = true;
+		$scope.creatingTeam = true;
+
+	}
+
+	$scope.createTeam = function(){
+		console.log($scope.teams)
+		for(var i = 0; i < $scope.teams.length; i++){
+			if($scope.teams[i].name == $scope.teamName){
+				$scope.errorMessage = "Team name already taken";
+				return;
+			}
+		}
+		$scope.errorMessage = false;
+		makeTeam();
+	}
+
+	$scope.joinTeam = function(team){
+		$scope.startGame(team);
 	}
 
 	$scope.createUser = function(event){
@@ -130,19 +160,52 @@ app.controller("orbController", function($scope, $http){
 
 //END API CALLS
 
-	$scope.startGame = function(){
+	$scope.startGame = function(team){
 		$(".modal").modal("hide");
 		$(".hiddenOnStart").removeAttr("hidden");
 		if(player.name){
-			init();
+			init(team);
 		}			
 	}
 		
 // SOCKET.IO STUFF
-	function init(){
-		socket.emit("init",{
+	function getTeams(){
+		socket.emit("getTeams", {
 			playerName: player.name
 		});
+	}
+
+	socket.on("returnTeams", function(data){
+		$scope.$apply(function(){
+			if(data.teams.length == 0){
+				$scope.errorMessage = "Sorry, there are currently no teams.";
+				$scope.teams = data.teams;
+			}else $scope.teams = data.teams;
+		});
+	});
+
+	function makeTeam(){
+		console.log("making");
+		socket.emit("makeTeam", {
+			playerName: player.name,
+			teamName: $scope.teamName
+		});
+		$scope.creatingTeam = false;
+	}
+
+	function init(team){
+		if(team != undefined){
+			socket.emit("init",{
+				playerName: player.name,
+				team: team
+			});
+		}else{
+			console.log("no team");
+			socket.emit("init",{
+				playerName: player.name,
+				team: false
+			});
+		}
 	}
 
 	socket.on("init_return", function(data){
@@ -253,10 +316,10 @@ app.controller("orbController", function($scope, $http){
 				context.arc(players[i].locX, players[i].locY, players[i].radius, 0, Math.PI*2);
 				context.fill();
 				context.lineWidth = 5;
-				if(players[i].id != player.id){
-					context.strokeStyle = '#ff0000';
-				}else{
+				if(players[i].team === player.team){
 					context.strokeStyle = '#00ff00';
+				}else{
+					context.strokeStyle = '#ff0000';
 				}
 				context.stroke();
 			}
