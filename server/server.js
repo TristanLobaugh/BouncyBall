@@ -176,7 +176,7 @@ io.sockets.on("connect", function(socket){
 		}
 	//PLAYER COLLISIONS	
 			for(var k = 0; k < players.length; k++){
-				if((player.id != players[k].id && (players[k].team !== player.team)) || ((players[k].team === player.team) && (player.action == "feed") && (player.radius > players[k].radius) && (player.radius >= 8))){
+				if((player.id != players[k].id && (players[k].team !== player.team)) || ((players[k].team === player.team) && (player.action == "feed") && (player.radius > players[k].radius) && (player.radius >= 8)) || (player.team === false)){
 				// AABB Test
 					if(player.locX + player.radius + players[k].radius > players[k].locX 
 					&& player.locX < players[k].locX + player.radius + players[k].radius
@@ -189,7 +189,7 @@ io.sockets.on("connect", function(socket){
 							);
 						if(distance < player.radius + players[k].radius){
 					//COLLISION!!
-							if((player.radius > players[k].radius && players[k].team !== player.team) || player.radius > players[k].radius && player.team === false){
+							if((player.radius > players[k].radius && players[k].team !== player.team) || (player.radius > players[k].radius && player.team === false)){
 						// ENEMY DEATH
 								player.score += (players[k].score + 10);
 								player.playersAbsorbed += 1;
