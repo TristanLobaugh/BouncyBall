@@ -7,8 +7,8 @@ var teams = [];
 var players = [];
 var orbs = [];
 var scoreboard = [];
-var defaultSpeed = 6;
-var defaultSize = 6;
+var defaultSpeed = 7;
+var defaultSize = 8;
 var defaultzoom = 1.5;
 var defaultOrbs = 1000;
 var worldWidth = 5000;
@@ -94,6 +94,7 @@ io.sockets.on("connect", function(socket){
 		this.zoom = defaultzoom;
 		this.xVector = 0;
 		this.yVector = 0;
+		this.action = false;
 		this.worldWidth = worldWidth;
 		this.worldHeight = worldHeight;
 		this.team = team;
@@ -109,6 +110,7 @@ io.sockets.on("connect", function(socket){
 				player = players[i];
 				player.xVector = data.playerXVector;
 				player.yVector = data.playerYVector;
+				player.action = data.playerAction;
 			}
 		}
 		if(player.alive){
@@ -165,7 +167,7 @@ io.sockets.on("connect", function(socket){
 		}
 	//PLAYER COLLISIONS	
 			for(var k = 0; k < players.length; k++){
-				if(player.id != players[k].id){
+				if((player.id != players[k].id && (players[k].team !== player.team)) || ((players[k].team === player.team) && (player.action == "feed") && (player.radius > players[k].radius) && (player.radius >= 8))){
 				// AABB Test
 					if(player.locX + player.radius + players[k].radius > players[k].locX 
 					&& player.locX < players[k].locX + player.radius + players[k].radius
@@ -178,7 +180,7 @@ io.sockets.on("connect", function(socket){
 							);
 						if(distance < player.radius + players[k].radius){
 					//COLLISION!!
-							if(player.radius > players[k].radius){
+							if(player.radius > players[k].radius && players[k].team !== player.team){
 						// ENEMY DEATH
 								player.score += (players[k].score + 10);
 								player.playersAbsorbed += 1;
@@ -193,7 +195,7 @@ io.sockets.on("connect", function(socket){
 									player.zoom -= (players[k].radius * 0.25) * .001;
 								}
 								players.splice(k, 1);
-							}else if(player.radius < players[k].radius){
+							}else if(player.radius < players[k].radius && players[k].team !== player.team){
 						// Player DEATH
 								players[k].score += (player.score + 10);
 								players[k].playersAbsorbed += 1;
@@ -210,6 +212,9 @@ io.sockets.on("connect", function(socket){
 										players.splice(i, 1);
 									}
 								}
+							}else{
+								player.radius -= 0.10;
+								players[k].radius += 0.10;
 							}
 						}
 					}

@@ -1,6 +1,8 @@
 var app = angular.module("orbApp", []);
 app.controller("orbController", function($scope, $http){
 	var player = {};
+	var keysDown = [];
+	var playerAction = false;
 	var orbs;
 	var players;
 	var wHeight = $(window).height();
@@ -71,7 +73,6 @@ app.controller("orbController", function($scope, $http){
 	}
 
 	$scope.createTeam = function(){
-		console.log($scope.teams)
 		for(var i = 0; i < $scope.teams.length; i++){
 			if($scope.teams[i].name == $scope.teamName){
 				$scope.errorMessage = "Team name already taken";
@@ -185,7 +186,6 @@ app.controller("orbController", function($scope, $http){
 	});
 
 	function makeTeam(){
-		console.log("making");
 		socket.emit("makeTeam", {
 			playerName: player.name,
 			teamName: $scope.teamName
@@ -200,7 +200,6 @@ app.controller("orbController", function($scope, $http){
 				team: team
 			});
 		}else{
-			console.log("no team");
 			socket.emit("init",{
 				playerName: player.name,
 				team: false
@@ -223,10 +222,12 @@ app.controller("orbController", function($scope, $http){
 
 	function tick(){
 		if(player.alive){
+			checkForAction();
 			socket.emit("tick",{
 				playerID: player.id,
 				playerXVector: player.xVector,
-				playerYVector: player.yVector
+				playerYVector: player.yVector,
+				playerAction: playerAction
 			});
 		}
 	}
@@ -333,6 +334,21 @@ app.controller("orbController", function($scope, $http){
 			x: Math.round((event.clientX-rect.left)/(rect.right-rect.left)*canvas.width*player.zoom),
 			y: Math.round((event.clientY-rect.top)/(rect.bottom-rect.top)*canvas.height*player.zoom)
 		};
+	}
+
+	addEventListener("keydown", function(event){
+		keysDown[event.keyCode] = true
+	});
+	addEventListener("keyup", function(event){
+		delete keysDown[event.keyCode];
+	});
+
+	function checkForAction(){
+		if(70 in keysDown){
+			playerAction = "feed";
+		}else{
+			playerAction = false;
+		}
 	}
 
 	canvas.addEventListener("mousemove", function(event){
