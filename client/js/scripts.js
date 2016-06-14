@@ -9,7 +9,7 @@ app.controller("orbController", function($scope, $http){
 	var wWidth = $(window).width();
 	var tickInterval;
 	var leaderInterval;
-	var fps = 1000/30;
+	var fps = 1000/25;
 
 //FOR AWS
 	var apiPath = "http://tristanlobaugh.com:3333/";

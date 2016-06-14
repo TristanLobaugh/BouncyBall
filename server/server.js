@@ -17,7 +17,7 @@ var tock;
 var routes = require('./routes/index');
 var bodyParser = require('body-parser');
 var tockInterval;
-var fps = 1000/30;
+var fps = 1000/50;
 
 
 app.use(bodyParser.json());
@@ -243,7 +243,6 @@ io.sockets.on("connect", function(socket){
 	}
 
 	function tock(){
-		console.log("tock");
 		io.sockets.emit("tock", {
 			players: players,
 			orbs: orbs
