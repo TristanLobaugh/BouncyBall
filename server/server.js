@@ -7,7 +7,7 @@ var teams = [];
 var players = [];
 var orbs = [];
 var scoreboard = [];
-var defaultSpeed = 7;
+var defaultSpeed = 4;
 var defaultSize = 8;
 var defaultzoom = 1.5;
 var defaultOrbs = 1000;
@@ -16,6 +16,8 @@ var worldHeight = 5000;
 var tock;
 var routes = require('./routes/index');
 var bodyParser = require('body-parser');
+var tockInterval;
+var fps = 1000/60;
 
 
 app.use(bodyParser.json());
@@ -34,6 +36,9 @@ app.use(express.static(__dirname + '/../client'));
 io.sockets.on("connect", function(socket){
 	if(connections == 0){
 		initGame();
+		tockInterval = setInterval(function(){
+			tock();
+		}, fps);
 		console.log("New Field");
 	}
 
@@ -48,6 +53,10 @@ io.sockets.on("connect", function(socket){
 		}
 		connections.splice(connections.indexOf(socket), 1);
 		console.log('Disconnected: %s sockets connected', connections.length);
+		if(connections.length == 0){
+			console.log("stop tock");
+			clearInterval(tockInterval);
+		}
 	});	
 
 	socket.on("getTeams", function(data){
@@ -229,16 +238,17 @@ io.sockets.on("connect", function(socket){
 		for(var i = 0; i < players.length; i++){
 			if(players[i].id == player.id){
 				players[i] = player;
-				socket.emit("tock",{
-					players: players,
-					orbs: orbs,
-					player: player
-				});
 			}
 		}
 	}
 
-
+	function tock(){
+		console.log("tock");
+		io.sockets.emit("tock", {
+			players: players,
+			orbs: orbs
+		});
+	}
 
 // END SOCKETS	
 });

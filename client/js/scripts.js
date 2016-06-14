@@ -9,11 +9,11 @@ app.controller("orbController", function($scope, $http){
 	var wWidth = $(window).width();
 	var tickInterval;
 	var leaderInterval;
-	var fps = 1000/30;
+	var fps = 1000/60;
 
 //FOR AWS
-	// var apiPath = "http://tristanlobaugh.com:3333/";
-	var apiPath = "http://localhost:3333/";
+	var apiPath = "http://tristanlobaugh.com:3333/";
+	// var apiPath = "http://localhost:3333/";
 
 	var canvas = document.getElementById("the-canvas");
 	var context = canvas.getContext("2d");
@@ -249,12 +249,18 @@ app.controller("orbController", function($scope, $http){
 	}
 
 	socket.on("tock", function(data){
-		players = data.players;
-		orbs = data.orbs;
-		player = data.player;
-		$scope.$apply(function(){
-			$scope.score = player.score;
-		});
+		if(player.alive){
+			for(var i = 0; i < data.players.length; i++){
+				if(data.players[i].id == player.id){
+					player = data.players[i];
+				}
+			}
+			players = data.players;
+			orbs = data.orbs;
+			$scope.$apply(function(){
+				$scope.score = player.score;
+			});
+		}
 	});
 
 	socket.on("death", function(data){
