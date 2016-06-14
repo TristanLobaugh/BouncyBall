@@ -12,8 +12,8 @@ app.controller("orbController", function($scope, $http){
 	var fps = 1000/25;
 
 //FOR AWS
-	// var apiPath = "http://tristanlobaugh.com:3333/";
-	var apiPath = "http://localhost:3333/";
+	var apiPath = "http://tristanlobaugh.com:3333/";
+	// var apiPath = "http://localhost:3333/";
 
 	var canvas = document.getElementById("the-canvas");
 	var context = canvas.getContext("2d");
