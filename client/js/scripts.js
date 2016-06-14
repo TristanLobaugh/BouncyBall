@@ -323,7 +323,7 @@ app.controller("orbController", function($scope, $http){
 				context.arc(players[i].locX, players[i].locY, players[i].radius, 0, Math.PI*2);
 				context.fill();
 				context.lineWidth = 5;
-				if(players[i].team === player.team){
+				if(players[i].team === player.team && player.team !== false){
 					context.strokeStyle = '#00ff00';
 				}else{
 					context.strokeStyle = '#ff0000';

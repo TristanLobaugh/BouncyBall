@@ -189,7 +189,7 @@ io.sockets.on("connect", function(socket){
 							);
 						if(distance < player.radius + players[k].radius){
 					//COLLISION!!
-							if(player.radius > players[k].radius && players[k].team !== player.team){
+							if((player.radius > players[k].radius && players[k].team !== player.team) || player.radius > players[k].radius && player.team === false){
 						// ENEMY DEATH
 								player.score += (players[k].score + 10);
 								player.playersAbsorbed += 1;
@@ -204,7 +204,7 @@ io.sockets.on("connect", function(socket){
 									player.zoom -= (players[k].radius * 0.25) * .001;
 								}
 								players.splice(k, 1);
-							}else if(player.radius < players[k].radius && players[k].team !== player.team){
+							}else if((player.radius < players[k].radius && players[k].team !== player.team) || (player.radius < players[k].radius && player.team === false)){
 						// Player DEATH
 								players[k].score += (player.score + 10);
 								players[k].playersAbsorbed += 1;
