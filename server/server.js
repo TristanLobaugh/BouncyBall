@@ -213,8 +213,14 @@ io.sockets.on("connect", function(socket){
 									}
 								}
 							}else{
-								player.radius -= 0.10;
-								players[k].radius += 0.10;
+								player.radius -= 0.25;
+								if(player.speed < defaultSpeed){
+									player.speed += 0.005;
+								}
+								players[k].radius += 0.25;
+								if(players[k].speed > 0.005){
+									player.speed -= 0.005;
+								}
 							}
 						}
 					}
