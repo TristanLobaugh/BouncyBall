@@ -6,12 +6,14 @@ app.controller("orbController", function($scope, $http){
 	var teams;
 	var orbs;
 	var players;
+	var bases;
 	var wHeight = $(window).height();
 	var wWidth = $(window).width();
 	var tickInterval;
 	var leaderInterval;
-	var fps = 1000/25;
-
+	var fps = 1000/60;
+	var base = new Image();
+	base.src = "img/base.png";
 //FOR AWS
 	var apiPath = "http://tristanlobaugh.com:3333/";
 	// var apiPath = "http://localhost:3333/";
@@ -217,6 +219,7 @@ app.controller("orbController", function($scope, $http){
 	socket.on("init_return", function(data){
 		player = data.init;
 		orbs = data.orbs;
+		bases = data.bases;
 		players = data.players;
 		tickInterval = setInterval(function(){
 			tick();
@@ -270,7 +273,7 @@ app.controller("orbController", function($scope, $http){
 			}
 			players = data.players;
 			$scope.$apply(function(){
-				if(player.team !==false){
+				if(player.team !== false){
 					$scope.myTeamScore = data.teams[player.team].teamScore;
 				}
 				$scope.teams = data.teams;
@@ -348,6 +351,20 @@ app.controller("orbController", function($scope, $http){
 				context.beginPath();
 				context.fillStyle = orbs[i].color;
 				context.arc(orbs[i].locX, orbs[i].locY, orbs[i].radius, 0, Math.PI*2);
+				context.fill();
+			}
+		// DRAW BASES
+			for(var i = 0; i < bases.length; i++){
+				context.drawImage(base, (bases[i].locX - 64), (bases[i].locY - 64));
+				context.beginPath();
+				if(bases[i].timeBeforeMove <= 10){
+					context.fillStyle = '#e60000';
+				}else if(bases[i].timeBeforeMove <= 20){
+					context.fillStyle = '#e6e600';
+				}else{
+					context.fillStyle = '#00e600';
+				}
+				context.arc((bases[i].locX), (bases[i].locY), 26, 0, Math.PI*2);
 				context.fill();
 			}
 		// DRAW PLAYERS

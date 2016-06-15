@@ -6,18 +6,20 @@ global.connections = [];
 var teams = [];
 var players = [];
 var orbs = [];
+var bases = [];
 var scoreboard = [];
-var defaultSpeed = 6;
+var defaultSpeed = 3;
 var defaultSize = 8;
 var defaultzoom = 1.5;
 var defaultOrbs = 1000;
+var defaultBases = 4;
 var worldWidth = 5000;
 var worldHeight = 5000;
 var tock;
 var routes = require('./routes/index');
 var bodyParser = require('body-parser');
 var tockInterval;
-var fps = 1000/50;
+var fps = 1000/60;
 
 
 app.use(bodyParser.json());
@@ -87,7 +89,8 @@ io.sockets.on("connect", function(socket){
 			socket.emit("init_return",{
 				init: players[players.length-1],
 				orbs: orbs,
-				players: players
+				players: players,
+				bases: bases
 			});
 		if(team !== false){
 			teams[team].players.push(players[players.length-1]);
@@ -170,7 +173,7 @@ io.sockets.on("connect", function(socket){
 						player.orbsAbsorbed += 1;
 						player.color = orbs[j].color;
 						if(player.zoom > 1){
-							player.zoom -= .001;
+							player.zoom -= 0.001;
 						}
 						orbs.splice(j, 1);
 						player.radius += 0.25;
@@ -188,6 +191,36 @@ io.sockets.on("connect", function(socket){
 					}
 			}
 		}
+
+	//BASE COLLISIONS
+		for(var i = 0; i < bases.length; i++){
+			if(player.action == "feed" && player.team !== false && player.radius > defaultSize){
+				// AABB Test
+					if(player.locX + player.radius + 47 > bases[i].locX 
+					&& player.locX < bases[i].locX + player.radius + 47
+					&& player.locY + player.radius + 47 > bases[i].locY 
+					&& player.locY < bases[i].locY + player.radius + 47){
+				// Pythagoras test
+						distance = Math.sqrt(
+							((player.locX - bases[i].locX) * (player.locX - bases[i].locX)) + 
+							((player.locY - bases[i].locY) * (player.locY - bases[i].locY))	
+							);
+						if(distance < player.radius + 47){
+					//COLLISION
+							player.radius -= 0.125;
+							teams[player.team].teamScore += 0.5;
+							if(player.speed < defaultSpeed){
+								player.speed += 0.0025;
+							}
+							if(player.zoom < defaultzoom){
+								player.zoom += 0.0005
+							}
+						}
+					}
+			}
+		}
+	
+
 	//PLAYER COLLISIONS	
 			for(var k = 0; k < players.length; k++){
 				if((player.id != players[k].id && (players[k].team !== player.team)) || ((players[k].team === player.team) && (player.action == "feed") && (player.radius > players[k].radius) && (player.radius >= 8)) || (player.team === false)){
@@ -236,13 +269,19 @@ io.sockets.on("connect", function(socket){
 									}
 								}
 							}else{
-								player.radius -= 0.25;
+								player.radius -= 0.125;
 								if(player.speed < defaultSpeed){
-									player.speed += 0.005;
+									player.speed += 0.0025;
 								}
-								players[k].radius += 0.25;
+								if(player.zoom < defaultzoom){
+									player.zoom += 0.0005
+								}
+								players[k].radius += 0.125;
 								if(players[k].speed > 0.005){
-									player.speed -= 0.005;
+									player.speed -= 0.0025;
+								}
+								if(players[k].zoom > 1){
+									players[k].zoom += 0.0005;
 								}
 							}
 						}
@@ -255,7 +294,6 @@ io.sockets.on("connect", function(socket){
 			}
 		}
 	}
-
 	function tock(){
 		io.sockets.emit("tock", {
 			players: players,
@@ -271,7 +309,9 @@ function initGame(){
 	players = [];
 	teams = [];
 	orbs = [];
+	bases = [];
 	createOrbs(defaultOrbs);
+	createBases(defaultBases);
 }
 
 function createOrbs(num){
@@ -285,6 +325,18 @@ function Orb(){
 	this.locX = Math.floor(Math.random()*worldWidth); 
 	this.locY = Math.floor(Math.random()*worldHeight);
 	this.radius = 5;
+}
+
+function createBases(num){
+	for(var i = 0; i < num; i++){
+		bases.push(new Base());
+	}
+}
+
+function Base(){
+	this.locX = (Math.floor(Math.random()*(worldWidth - 200)) + 100);
+	this.locY = (Math.floor(Math.random()*(worldHeight - 200)) + 100);
+	this.timeBeforeMove = (Math.floor(Math.random() * 60) + 60);
 }
 
 function getRandomColor(){
