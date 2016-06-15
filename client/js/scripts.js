@@ -3,6 +3,7 @@ app.controller("orbController", function($scope, $http){
 	var player = {};
 	var keysDown = [];
 	var playerAction = false;
+	var teams;
 	var orbs;
 	var players;
 	var wHeight = $(window).height();
@@ -12,8 +13,8 @@ app.controller("orbController", function($scope, $http){
 	var fps = 1000/25;
 
 //FOR AWS
-	var apiPath = "http://tristanlobaugh.com:3333/";
-	// var apiPath = "http://localhost:3333/";
+	// var apiPath = "http://tristanlobaugh.com:3333/";
+	var apiPath = "http://localhost:3333/";
 
 	var canvas = document.getElementById("the-canvas");
 	var context = canvas.getContext("2d");
@@ -25,6 +26,8 @@ app.controller("orbController", function($scope, $http){
 	$scope.score = 0;
 	$scope.sortOrder = "-score";
 	$scope.errorMessage = false;
+	$scope.sortTeams = false;
+	$scope.onTeam = false;
 
 	$(window).load(function(){
 		$("#loginModal").modal("show");
@@ -85,6 +88,10 @@ app.controller("orbController", function($scope, $http){
 
 	$scope.joinTeam = function(team){
 		$scope.startGame(team);
+		$scope.sortTeams = true;
+		$scope.onTeam = true;
+		$(".sort-option").removeClass("active");
+		$("#sort-teams").addClass("active");
 	}
 
 	$scope.createUser = function(event){
@@ -239,12 +246,18 @@ app.controller("orbController", function($scope, $http){
 	$scope.sortBy = function(sortItem){
 		$scope.sortOrder = "-" + sortItem;
 		$(".sort-option").removeClass("active");
-		if(sortItem == "score"){
-			$("#sort-score").addClass("active");
-		}else if(sortItem == "orbsAbsorbed"){
-			$("#sort-orbs").addClass("active");
-		}else if(sortItem == "playersAbsorbed"){
-			$("#sort-players").addClass("active");
+		if(sortItem == "teamScore"){
+			$scope.sortTeams = true;
+			$("#sort-teams").addClass("active");
+		}else{
+			$scope.sortTeams = false;
+			if(sortItem == "score"){
+				$("#sort-score").addClass("active");
+			}else if(sortItem == "orbsAbsorbed"){
+				$("#sort-orbs").addClass("active");
+			}else if(sortItem == "playersAbsorbed"){
+				$("#sort-players").addClass("active");
+			}
 		}
 	}
 
@@ -252,15 +265,36 @@ app.controller("orbController", function($scope, $http){
 		if(player.alive){
 			for(var i = 0; i < data.players.length; i++){
 				if(data.players[i].id == player.id){
-					player = data.players[i];
+					player = data.players[i];					
 				}
 			}
 			players = data.players;
-			orbs = data.orbs;
 			$scope.$apply(function(){
+				if(player.team !==false){
+					$scope.myTeamScore = data.teams[player.team].teamScore;
+				}
+				$scope.teams = data.teams;
 				$scope.score = player.score;
 			});
 		}
+	});
+
+	socket.on("join", function(data){
+		if(player.name != data.playerName && data.teamName === false){
+			$scope.gameMessage = data.playerName + " joined the game!";
+			$("#game-message").css({"background-color": "#00e600"});
+			$("#game-message").css({opacity: 0.7});
+			$("#game-message").fadeTo(5000, 0);
+		}else if(player.name != data.playerName){
+			$scope.gameMessage = data.playerName + " joined team " + data.teamName;
+			$("#game-message").css({"background-color": "#00e600"});
+			$("#game-message").css({opacity: 0.7});
+			$("#game-message").fadeTo(5000, 0);
+		}
+	});
+
+	socket.on("orbs", function(data){
+		orbs = data.orbs;
 	});
 
 	socket.on("death", function(data){

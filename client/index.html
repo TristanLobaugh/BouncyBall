@@ -12,20 +12,30 @@
 			<canvas id="the-canvas" style="background: url('img/starfield.jpg')">
 				<!-- our drawing will go here -->
 			</canvas>
+			<div id="team-progress-wrapper" ng-show="onTeam">
+				<div id="team-progress-bar" class="progress">
+				  <div class="progress-bar" role="progressbar" aria-valuenow="{{myTeamScore/100}}"
+				  aria-valuemin="0" aria-valuemax="100" style="width: {{(myTeamScore/100)}}%">
+				  </div>
+				</div>
+			</div>
 			<div id="score-wrapper" class="hiddenOnStart" hidden>
 				<div>Score: <span>{{score}}</span></div>
 			</div>
+		<!-- LEADER BOARD -->
 			<div id="leader-board-wrapper" class="hiddenOnStart" hidden>
 				<div id="leader-board">
 					<h3 class="text-center">Leaders</h3>
 					<hr>
 					<ol>
-						<li class="leaderboard-player" ng-repeat="player in players | orderBy: sortOrder">{{player.name}}</li>
+						<li class="leaderboard-player" ng-hide="sortTeams" ng-repeat="player in players | orderBy: sortOrder">{{player.name}}</li>
+						<li class="leaderboard-player" ng-show="sortTeams" ng-repeat="team in teams | orderBy: sortOrder">{{team.name}}</li>
 					</ol>
 					<hr>
 				</div>
 				<div id="sort-wrapper">
 					<div id="sort-header" class="text-center">SORT BY</div>
+					<div id="sort-teams" class="sort-option" ng-click="sortBy('teamScore')">Teams</div>
 					<div id="sort-score" class="sort-option active" ng-click="sortBy('score')">Score</div>
 					<div id="sort-orbs" class="sort-option" ng-click="sortBy('orbsAbsorbed')">Orbs</div>
 					<div id="sort-players" class="sort-option" ng-click="sortBy('playersAbsorbed')">Players</div>
@@ -41,7 +51,7 @@
 			<!-- Modals -->
 <!-- LOGIN MODAL -->
 			<div id="loginModal" class="modal fade" role="dialog">
-				<div class="modal-dialog modal-sm">
+				<div class="modal-dialog">
 
 				<!-- Modal content-->
 					<div class="modal-content">
@@ -52,7 +62,7 @@
 						<div class="modal-body">
 							<form class="name-form" ng-submit="login()">
 								<input id="name-input" class="text-input text-center form-control" type="text" name="name-input" ng-model="playerName" placeholder="Enter your name here" required>
-								<input type="password" style="display: none" name="">
+<!-- 								<input type="password" style="display: none" name=""> -->
 								<input id="password-input" class="text-input text-center form-control" type="password" name="password-input" ng-model="playerPassword" placeholder="Enter your password here" required>
 								<div class="text-center error-message" ng-show="errorMessage">{{errorMessage}}</div>
 								<button type="submit" class="btn play-button">Login</button>
@@ -80,7 +90,7 @@
 
 <!-- CREATE USER MODAL -->
 			<div id="createModal" class="modal fade" role="dialog">
-				<div class="modal-dialog modal-sm">
+				<div class="modal-dialog">
 
 				<!-- Modal content-->
 					<div class="modal-content">
@@ -90,7 +100,7 @@
 						</div>
 						<div class="modal-body">
 							<form class="name-form" ng-submit="createUser()">
-								<input id="name-input" class="text-input text-center form-control" type="text" minlength="3" name="name-input" ng-model="playerName" placeholder="Enter your user name here" required>
+								<input id="name-input" class="text-input text-center form-control" type="text" minlength="3" name="name-input" ng-model="playerName" placeholder="Enter your user name here" maxlength="10" required>
 								<input id="password-input" class="text-input text-center form-control" type="password" minlength="6" name="password-input" ng-model="playerPassword" placeholder="Enter your password here" required>
 								<input id="password-input2" class="text-input text-center form-control" type="password" minlength="6" name="password-input2" ng-model="playerPassword2" placeholder="Confirm password" required>
 								<div class="text-center error-message" ng-show="errorMessage">{{errorMessage}}</div>
@@ -116,7 +126,7 @@
 
 <!-- START MODAL -->
 			<div id="spawnModal" class="modal fade" role="dialog">
-				<div class="modal-dialog modal-sm">
+				<div class="modal-dialog">
 
 				<!-- Modal content-->
 					<div class="modal-content">
@@ -154,7 +164,7 @@
 
 <!-- JOIN TEAM MODAL -->
 			<div id="joinModal" class="modal fade" role="dialog">
-				<div class="modal-dialog modal-sm">
+				<div class="modal-dialog">
 
 				<!-- Modal content-->
 					<div class="modal-content">
@@ -167,11 +177,11 @@
 							<h2 class="text-center error-message" ng-show="errorMessage">{{errorMessage}}</h2>
 							<ol id="team-list">
 								<li class="teams" ng-repeat="team in teams track by $index">
+									<span class="team">{{team.name}}  -  Current Players: {{team.players.length}}</span>
 									<button ng-click="joinTeam($index)" class="btn join-button">Join and Play!</button>
-									<span class="team">{{team.name}} - Current Players: {{team.players.length}}</span>
 								</li>
 							</ol>
-							<input ng-show="creatingTeam" id="team-input" class="text-input text-center" type="text" minlength="3" name="name-input" ng-model="teamName" placeholder="Enter your team name here"  required>
+							<input ng-show="creatingTeam" id="team-input" class="text-input text-center" type="text" minlength="3" name="name-input" ng-model="teamName" placeholder="Enter your team name here" maxlength="10"  required>
 							<div class="play-btn-wrapper">
 								<button id="add-team-btn" ng-hide="addingTeam" type="button" ng-click="addTeam()" class="btn play-button">Add a Team!</button>
 								<button ng-show="creatingTeam" id="create-team-btn" type="button" ng-click="createTeam()" class="btn play-button">Create Team!</button>
@@ -197,7 +207,7 @@
 
 <!-- DEATH MODAL -->
 			<div id="deathModal" class="modal fade" role="dialog">
-				<div class="modal-dialog modal-sm">
+				<div class="modal-dialog">
 
 				<!-- Modal content-->
 					<div class="modal-content">
@@ -211,8 +221,8 @@
 						<div class="modal-body">
 							<button type="button" ng-click="startGame()" class="btn play-button">Respawn?</button>
 							<div class="stats-btn-wrapper">
-								<button id="player-stats-btn" type="button" ng-click="getPlayerStats()" class="btn stats-btn">See your stats</button>
-								<button id="all-stats-btn" type="button" ng-click="getAllStats()" class="btn stats-btn">See all stats</button>
+								<button  type="button" ng-click="getPlayerStats()" class="btn stats-btn player-stats-btn">See your stats</button>
+								<button type="button" ng-click="getAllStats()" class="btn stats-btn all-stats-btn">See all stats</button>
 							</div>
 						</div>
 						<div class="modal-footer">
@@ -234,7 +244,7 @@
 
 <!-- Player Stats MODAL -->
 			<div id="playerModal" class="modal fade" role="dialog">
-				<div class="modal-dialog modal-sm">
+				<div class="modal-dialog">
 
 				<!-- Modal content-->
 					<div class="modal-content">

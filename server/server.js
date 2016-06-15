@@ -70,7 +70,8 @@ io.sockets.on("connect", function(socket){
 		console.log(data.playerName + " makeing " + data.teamName + " team.");
 		teams.push({
 					name: data.teamName,
-					players: []
+					players: [],
+					teamScore: 0
 					});
 		io.sockets.emit("returnTeams", {
 			teams: teams
@@ -83,15 +84,25 @@ io.sockets.on("connect", function(socket){
 
 	function newPlayer(playerName, team){
 		players.push(new Player(playerName, team));
+			socket.emit("init_return",{
+				init: players[players.length-1],
+				orbs: orbs,
+				players: players
+			});
 		if(team !== false){
 			teams[team].players.push(players[players.length-1]);
+			io.sockets.emit("join",{
+				playerName: playerName,
+				teamName: teams[team].name
+			});
+		}else{
+			io.sockets.emit("join",{
+				playerName: playerName,
+				teamName: team
+			});
 		}
-		socket.emit("init_return",{
-			init: players[players.length-1],
-			orbs: orbs,
-			players: players
-		});
 	}
+
 	function Player(playerName, team){
 		this.id = socket.conn.id;
 		this.name = playerName;
@@ -171,6 +182,9 @@ io.sockets.on("connect", function(socket){
 						if(orbs.length < defaultOrbs){
 							createOrbs(1);
 						}
+						io.sockets.emit("orbs", {
+							orbs: orbs
+						});
 					}
 			}
 		}
@@ -245,7 +259,7 @@ io.sockets.on("connect", function(socket){
 	function tock(){
 		io.sockets.emit("tock", {
 			players: players,
-			orbs: orbs
+			teams: teams
 		});
 	}
 

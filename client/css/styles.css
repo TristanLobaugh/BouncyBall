@@ -24,7 +24,7 @@ h3{
 }
 
 #leader-board-wrapper{
-	min-width: 160px;
+	min-width: 200px;
 	background-color: #800000;
 	color: white;
 	font-size: 18px;
@@ -42,6 +42,11 @@ h3{
 #sort-wrapper{
 	margin-top: -20px;
 	font-size: 14px;
+}
+
+#sort-teams{
+	width: 100%;
+	float: none;
 }
 
 .sort-option{
@@ -186,10 +191,11 @@ canvas{
 }
 
 .teams{
-	margin: 10px 0;
+	margin: 20px 0;
 }
 
 .join-button{
+	float: right;
 	color: white;
 	background-color: #00e6e6;
 	margin-right: 10px;
@@ -197,6 +203,29 @@ canvas{
 
 .team{
 	font-size: 18px
+}
+
+#team-progress-wrapper{
+	position: fixed;
+	width: 100%;
+	top: 20px;
+}
+
+#team-progress-bar{
+	width: 300px;
+	display: table;
+	font-size: 20px;
+	border-radius: 5px;
+	color: white;
+	background-color: black;
+	margin: auto;
+	opacity: 0.7;
+	border: 1px solid #00e600;
+}
+
+.progress-bar{
+
+	background-color: #00e600;
 }
 
 #game-message-wrapper{
