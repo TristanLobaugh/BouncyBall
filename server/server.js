@@ -8,7 +8,7 @@ var players = [];
 var orbs = [];
 var bases = [];
 var scoreboard = [];
-var defaultSpeed = 3;
+var defaultSpeed = 6;
 var defaultSize = 8;
 var defaultzoom = 1.5;
 var defaultOrbs = 1000;
@@ -23,7 +23,7 @@ var routes = require('./routes/index');
 var bodyParser = require('body-parser');
 var tockInterval;
 var clockInterval;
-var fps = 1000 / 60;
+var fps = 1000 / 30;
 
 
 app.use(bodyParser.json());

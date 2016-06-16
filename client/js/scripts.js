@@ -10,7 +10,7 @@ app.controller("orbController", function($scope, $http){
 	var wWidth = $(window).width();
 	var tickInterval;
 	var leaderInterval;
-	var fps = 1000/60;
+	var fps = 1000/30;
 	var base = new Image();
 	base.src = "img/base.png";
 // FOR AWS
