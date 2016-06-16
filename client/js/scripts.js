@@ -14,7 +14,7 @@ app.controller("orbController", function($scope, $http){
 	var fps = 1000/60;
 	var base = new Image();
 	base.src = "img/base.png";
-//FOR AWS
+// FOR AWS
 	var apiPath = "http://tristanlobaugh.com:3333/";
 	// var apiPath = "http://localhost:3333/";
 
@@ -282,6 +282,10 @@ app.controller("orbController", function($scope, $http){
 		}
 	});
 
+	socket.on("bases", function(data){
+		bases = data.bases;
+	});
+
 	socket.on("join", function(data){
 		if(player.name != data.playerName && data.teamName === false){
 			$scope.gameMessage = data.playerName + " joined the game!";
@@ -358,7 +362,14 @@ app.controller("orbController", function($scope, $http){
 				context.drawImage(base, (bases[i].locX - 64), (bases[i].locY - 64));
 				context.beginPath();
 				if(bases[i].timeBeforeMove <= 10){
-					context.fillStyle = '#e60000';
+					console.log(bases[i].timeBeforeMove);
+					if(bases[i].timeBeforeMove % 2 == 0){
+						console.log("black");
+						context.fillStyle = 'black';
+					}else{
+						console.log("red");
+						context.fillStyle = '#e60000';
+					}
 				}else if(bases[i].timeBeforeMove <= 20){
 					context.fillStyle = '#e6e600';
 				}else{

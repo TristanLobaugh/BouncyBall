@@ -16,9 +16,11 @@ var defaultBases = 4;
 var worldWidth = 5000;
 var worldHeight = 5000;
 var tock;
+var basesEmit;
 var routes = require('./routes/index');
 var bodyParser = require('body-parser');
 var tockInterval;
+var clockInterval;
 var fps = 1000/60;
 
 
@@ -41,6 +43,9 @@ io.sockets.on("connect", function(socket){
 		tockInterval = setInterval(function(){
 			tock();
 		}, fps);
+		clockInterval = setInterval(function(){
+			clock();
+		}, 1000);
 		console.log("New Field");
 	}
 
@@ -58,6 +63,7 @@ io.sockets.on("connect", function(socket){
 		if(connections.length == 0){
 			console.log("stop tock");
 			clearInterval(tockInterval);
+			clearInterval(clockInterval);
 		}
 	});	
 
@@ -220,68 +226,71 @@ io.sockets.on("connect", function(socket){
 			}
 		}
 	
-
 	//PLAYER COLLISIONS	
 			for(var k = 0; k < players.length; k++){
-				if((player.id != players[k].id && (players[k].team !== player.team)) || ((players[k].team === player.team) && (player.action == "feed") && (player.radius > players[k].radius) && (player.radius >= 8)) || (player.team === false)){
-				// AABB Test
-					if(player.locX + player.radius + players[k].radius > players[k].locX 
-					&& player.locX < players[k].locX + player.radius + players[k].radius
-					&& player.locY + player.radius + players[k].radius > players[k].locY 
-					&& player.locY < players[k].locY + player.radius + players[k].radius){
-				// Pythagoras test
-						distance = Math.sqrt(
-							((player.locX - players[k].locX) * (player.locX - players[k].locX)) + 
-							((player.locY - players[k].locY) * (player.locY - players[k].locY))	
-							);
-						if(distance < player.radius + players[k].radius){
-					//COLLISION!!
-							if((player.radius > players[k].radius && players[k].team !== player.team) || (player.radius > players[k].radius && player.team === false)){
-						// ENEMY DEATH
-								player.score += (players[k].score + 10);
-								player.playersAbsorbed += 1;
-								players[k].alive = false;
-								io.sockets.emit("death", {
-									message: "Player Killed",
-									died: players[k],
-									killedBy: player.name,
-								});
-								player.radius += (players[k].radius * 0.25)
-								if(player.zoom > 1){
-									player.zoom -= (players[k].radius * 0.25) * .001;
-								}
-								players.splice(k, 1);
-							}else if((player.radius < players[k].radius && players[k].team !== player.team) || (player.radius < players[k].radius && player.team === false)){
-						// Player DEATH
-								players[k].score += (player.score + 10);
-								players[k].playersAbsorbed += 1;
-								player.alive = false;
-								io.sockets.emit("death", {
-									message: "PLAYER DEATH",
-									died: player,
-									killedBy: players[k].name,
-								});								
-								players[k].radius += (player.radius * 0.25)
-								player.zoom -= (player.radius * 0.25) * .01;
-								for(var i = 0; i < players.length; i++){
-									if(players[i].id == player.id){
-										players.splice(i, 1);
+				if(player.id != players[k].id){
+					if((players[k].team !== player.team) || ((players[k].team === player.team) && (player.action == "feed") && (player.radius > players[k].radius) && (player.radius > defaultSize)) || (player.team === false)){
+					// AABB Test
+						if(player.locX + player.radius + players[k].radius > players[k].locX 
+						&& player.locX < players[k].locX + player.radius + players[k].radius
+						&& player.locY + player.radius + players[k].radius > players[k].locY 
+						&& player.locY < players[k].locY + player.radius + players[k].radius){
+					// Pythagoras test
+							distance = Math.sqrt(
+								((player.locX - players[k].locX) * (player.locX - players[k].locX)) + 
+								((player.locY - players[k].locY) * (player.locY - players[k].locY))	
+								);
+							console.log("collision check");
+							if(distance < player.radius + players[k].radius){
+						//COLLISION!!
+								if((player.radius > players[k].radius && players[k].team !== player.team) || (player.radius > players[k].radius && player.team === false)){
+							// ENEMY DEATH
+									player.score += (players[k].score + 10);
+									player.playersAbsorbed += 1;
+									players[k].alive = false;
+									io.sockets.emit("death", {
+										message: "Player Killed",
+										died: players[k],
+										killedBy: player.name,
+									});
+									player.radius += (players[k].radius * 0.25)
+									if(player.zoom > 1){
+										player.zoom -= (players[k].radius * 0.25) * .001;
 									}
-								}
-							}else{
-								player.radius -= 0.125;
-								if(player.speed < defaultSpeed){
-									player.speed += 0.0025;
-								}
-								if(player.zoom < defaultzoom){
-									player.zoom += 0.0005
-								}
-								players[k].radius += 0.125;
-								if(players[k].speed > 0.005){
-									player.speed -= 0.0025;
-								}
-								if(players[k].zoom > 1){
-									players[k].zoom += 0.0005;
+									players.splice(k, 1);
+								}else if((player.radius < players[k].radius && players[k].team !== player.team) || (player.radius < players[k].radius && player.team === false)){
+							// Player DEATH
+									players[k].score += (player.score + 10);
+									players[k].playersAbsorbed += 1;
+									player.alive = false;
+									io.sockets.emit("death", {
+										message: "PLAYER DEATH",
+										died: player,
+										killedBy: players[k].name,
+									});								
+									players[k].radius += (player.radius * 0.25)
+									player.zoom -= (player.radius * 0.25) * .01;
+									for(var i = 0; i < players.length; i++){
+										if(players[i].id == player.id){
+											players.splice(i, 1);
+										}
+									}
+								}else{
+									player.radius -= 0.125;
+									if(player.speed < defaultSpeed){
+										player.speed += 0.0025;
+									}
+									if(player.zoom < defaultzoom){
+										console.log("line 277");
+										player.zoom += 0.0005
+									}
+									players[k].radius += 0.125;
+									if(players[k].speed > 0.005){
+										player.speed -= 0.0025;
+									}
+									if(players[k].zoom > 1){
+										players[k].zoom -= 0.0005;
+									}
 								}
 							}
 						}
@@ -300,6 +309,21 @@ io.sockets.on("connect", function(socket){
 			teams: teams
 		});
 	}
+	function clock(){
+	for(var i = 0; i < bases.length; i++){
+		bases[i].timeBeforeMove--;
+		if(bases[i].timeBeforeMove <= 0){
+			bases[i].locX = (Math.floor(Math.random()*(worldWidth - 200)) + 100);
+			bases[i].locY = (Math.floor(Math.random()*(worldHeight - 200)) + 100);
+			bases[i].timeBeforeMove = (Math.floor(Math.random() * 60) + 60);
+		}
+	}
+	io.sockets.emit("bases", {
+		bases: bases
+	});
+}
+		
+
 
 // END SOCKETS	
 });
