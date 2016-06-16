@@ -213,13 +213,18 @@
 					<div class="modal-content">
 						<div class="modal-header">
 							<button type="button" class="close" data-dismiss="modal">&times;</button>
-							<h2 id="death-message" class="modal-title text-center">You were killed by: <span id="killed-by">{{killer}}</span></h2>
+							<h2 id="death-message" ng-hide="endGame" class="modal-title text-center">You were killed by: <span id="killed-by">{{killer}}</span></h2>
+							<h2 id="end-game-message" ng-show="endGame" class="modal-title text-center">{{endGameMessage}}</h2>
 							<div class="player-stats">Score: <span>{{score}}</span></div>
 							<div class="player-stats">Orbs Absorbed: <span>{{orbsAbsorbed}}</span></div>
 							<div class="player-stats">Players Absorbed: <span>{{playersAbsorbed}}</span></div>
 						</div>
 						<div class="modal-body">
-							<button type="button" ng-click="startGame()" class="btn play-button">Respawn?</button>
+							<div id="death-play-wrapper">
+								<button id="death-respawn-btn" ng-hide="endGame" type="button" ng-click="startGame()" class="btn play-button">Respawn?</button>
+								<button id="death-respawn-btn" ng-show="endGame" type="button" ng-click="playAgain()" class="btn play-button">Play Again?</button>
+								<button id="death-leave-team-btn" type="button" ng-show="onTeam" ng-click="leaveTeam()" class="btn play-button">Leave Team?</button>
+							</div>
 							<div class="stats-btn-wrapper">
 								<button  type="button" ng-click="getPlayerStats()" class="btn stats-btn player-stats-btn">See your stats</button>
 								<button type="button" ng-click="getAllStats()" class="btn stats-btn all-stats-btn">See all stats</button>

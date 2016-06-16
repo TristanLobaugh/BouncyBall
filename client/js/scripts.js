@@ -3,7 +3,6 @@ app.controller("orbController", function($scope, $http){
 	var player = {};
 	var keysDown = [];
 	var playerAction = false;
-	var teams;
 	var orbs;
 	var players;
 	var bases;
@@ -15,7 +14,7 @@ app.controller("orbController", function($scope, $http){
 	var base = new Image();
 	base.src = "img/base.png";
 // FOR AWS
-	var apiPath = "http://tristanlobaugh.com:3333/";
+	var apiPath = "http://orb-blitz.tristanlobaugh.com/";
 	// var apiPath = "http://localhost:3333/";
 
 	var canvas = document.getElementById("the-canvas");
@@ -30,9 +29,11 @@ app.controller("orbController", function($scope, $http){
 	$scope.errorMessage = false;
 	$scope.sortTeams = false;
 	$scope.onTeam = false;
+	$scope.endGame = false;
 
 	$(window).load(function(){
 		$("#loginModal").modal("show");
+		// $("#deathModal").modal("show");
 	});
 
 //API CALLS
@@ -149,8 +150,6 @@ app.controller("orbController", function($scope, $http){
 		});
 	}
 
-
-
 	function updateStats(){
 		$http.post(apiPath + "update",{
 			userName: $scope.playerName,
@@ -171,11 +170,35 @@ app.controller("orbController", function($scope, $http){
 //END API CALLS
 
 	$scope.startGame = function(team){
+		$scope.addingTeam = false;
+		$scope.creatingTeam = false;
+		$scope.endGame = false;
 		$(".modal").modal("hide");
 		$(".hiddenOnStart").removeAttr("hidden");
-		if(player.name){
+		if(player.team !== false && player.inGame === true){
+			respawn();
+		}
+		else if(player.name){
 			init(team);
 		}			
+	}
+
+	$scope.leaveTeam = function(){
+		socket.emit("leaveTeam", {
+			player: player
+		});
+		$scope.sortOrder = "-score";
+		$scope.onTeam = false;
+		player.team = false;
+		player.inGame = false;
+		$(".modal").modal("hide");
+		$("#spawnModal").modal("show");
+	}
+
+	$scope.playAgain = function(){
+		$scope.sortOrder = "-score";
+		$(".modal").modal("hide");
+		$("#spawnModal").modal("show");
 	}
 		
 // SOCKET.IO STUFF
@@ -216,7 +239,15 @@ app.controller("orbController", function($scope, $http){
 		}
 	}
 
+	function respawn(){
+		console.log("respawn");
+		socket.emit("respawn",{
+			playerID: player.id
+		});
+	}
+
 	socket.on("init_return", function(data){
+		console.log("init return");
 		player = data.init;
 		orbs = data.orbs;
 		bases = data.bases;
@@ -331,6 +362,33 @@ app.controller("orbController", function($scope, $http){
 		}
 	});
 
+	socket.on("win", function(data){
+		$(".hiddenOnStart").attr("hidden", "hidden");
+		player.alive = false;
+		player.inGame = false;
+		$scope.onTeam = false;
+		$scope.endGame = true;
+		clearInterval(tickInterval);
+		clearInterval(leaderInterval);
+		if(player.team === false){
+			$scope.endGameMessage = "Team " + data.winningTeam.name + " won!";
+		}else{
+			if(data.winningTeam.name === $scope.teams[player.team].name){
+				$scope.endGameMessage = "Congrats!!! Team " + data.winningTeam.name + " won!";
+			}else{
+				$scope.endGameMessage = "Sorry, you lost...Team " + data.winningTeam.name + " won.";
+			}
+		}
+		$("#deathModal").modal("show");
+		$scope.$apply(function(){
+			$scope.score = player.score;
+			$scope.orbsAbsorbed = player.orbsAbsorbed;
+			$scope.playersAbsorbed = player.playersAbsorbed;
+		});
+		player.team = false;
+		updateStats();
+	});
+
 	// Currently not used, but should stop the camera from over scrolling
 	// function clamp(value, min, max){
 	//     if(value < min) return min;
@@ -339,7 +397,7 @@ app.controller("orbController", function($scope, $http){
 	// }
 
 	function draw(){
-		if(player.alive == true){	
+		if(player.alive === true){	
 			canvas.style.width = (wWidth * player.zoom) +"px";
 			canvas.style.height = (wHeight * player.zoom) +"px";
 			context.setTransform(1,0,0,1,0,0);//reset the transform matrix as it is cumulative
@@ -362,12 +420,9 @@ app.controller("orbController", function($scope, $http){
 				context.drawImage(base, (bases[i].locX - 64), (bases[i].locY - 64));
 				context.beginPath();
 				if(bases[i].timeBeforeMove <= 10){
-					console.log(bases[i].timeBeforeMove);
 					if(bases[i].timeBeforeMove % 2 == 0){
-						console.log("black");
 						context.fillStyle = 'black';
 					}else{
-						console.log("red");
 						context.fillStyle = '#e60000';
 					}
 				}else if(bases[i].timeBeforeMove <= 20){
@@ -380,17 +435,19 @@ app.controller("orbController", function($scope, $http){
 			}
 		// DRAW PLAYERS
 			for (var i = 0; i < players.length; i++){
-				context.beginPath();
-				context.fillStyle = players[i].color;
-				context.arc(players[i].locX, players[i].locY, players[i].radius, 0, Math.PI*2);
-				context.fill();
-				context.lineWidth = 5;
-				if((players[i].team === player.team && player.team !== false)|| (players[i].id === player.id)){
-					context.strokeStyle = '#00ff00';
-				}else{
-					context.strokeStyle = '#ff0000';
+				if(players[i].alive === true){
+					context.beginPath();
+					context.fillStyle = players[i].color;
+					context.arc(players[i].locX, players[i].locY, players[i].radius, 0, Math.PI*2);
+					context.fill();
+					context.lineWidth = 5;
+					if((players[i].team === player.team && player.team !== false)|| (players[i].id === player.id)){
+						context.strokeStyle = '#00ff00';
+					}else{
+						context.strokeStyle = '#ff0000';
+					}
+					context.stroke();
 				}
-				context.stroke();
 			}
 			requestAnimationFrame(draw);
 		} //End DRAW FUNCTION

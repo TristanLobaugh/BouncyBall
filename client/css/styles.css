@@ -110,7 +110,7 @@ canvas{
 	color: #FFFFFF;
 }
 
-#join-team-btn, #play-solo-btn, #create-team-btn, #create-play-solo-btn, #add-team-btn{
+#join-team-btn, #play-solo-btn, #create-team-btn, #create-play-solo-btn, #add-team-btn, #death-respawn-btn, #death-leave-team-btn{
 	width: 48%;
 	margin: 5px auto 15px;
 	font-size: 18px;	
@@ -150,7 +150,8 @@ canvas{
 	color: #FFFFFF;
 }
 
-.stats-btn-wrapper, .play-btn-wrapper{
+.stats-btn-wrapper, .play-btn-wrapper, #death-play-wrapper{
+	clear: both;
 	width: 90%;
 	margin: auto;
 }
@@ -160,12 +161,16 @@ canvas{
 	margin: 20px auto;
 }
 
-.player-stats-btn, #join-team-btn, #create-team-btn, #add-team-btn{
+.player-stats-btn, #join-team-btn, #create-team-btn, #add-team-btn, #death-respawn-btn{
 	float: left;
 }
 
-.all-stats-btn, #play-solo-btn, #create-play-solo-btn{
+.all-stats-btn, #play-solo-btn, #create-play-solo-btn, #death-leave-team-btn{
 	float: right;
+}
+
+#death-leave-team-btn{
+	background-color: #e60000;
 }
 
 .stats, .stat-number{
