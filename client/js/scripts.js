@@ -14,15 +14,16 @@ app.controller("orbController", function($scope, $http){
 	var base = new Image();
 	base.src = "img/base.png";
 // FOR AWS
-	var apiPath = "http://orb-blitz.tristanlobaugh.com/";
+	// var apiPath = "http://orb-blitz.tristanlobaugh.com/";
 	// var apiPath = "http://localhost:3333/";
+	var apiPath = "http://tristanlobaugh.com:3333/";
 
 	var canvas = document.getElementById("the-canvas");
 	var context = canvas.getContext("2d");
 	canvas.width = wWidth;
 	canvas.height = wHeight;
 
-	var socket = io.connect();
+	var socket = io.connect("http://174.129.90.83:3333");
 
 	$scope.score = 0;
 	$scope.scoreToWin = 500;
