@@ -26,7 +26,7 @@ app.controller("orbController", function($scope, $http){
 
 	$scope.score = 0;
 	$scope.sortOrder = "-score";
-	#scope.sortStatBy = "-highScore";
+	$scope.sortStatBy = "-highScore";
 	$scope.errorMessage = false;
 	$scope.sortTeams = false;
 	$scope.onTeam = false;
