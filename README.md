@@ -12,7 +12,7 @@
 
 ## Demo
 
-[Live Demo](http://orb-blitztristanlobaugh.com/)
+[Live Demo](http://tristanlobaugh.com/Orb-Blitz/)
 
 ## Screenshots
 
