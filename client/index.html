@@ -14,8 +14,8 @@
 			</canvas>
 			<div id="team-progress-wrapper" ng-show="onTeam">
 				<div id="team-progress-bar" class="progress">
-				  <div class="progress-bar" role="progressbar" aria-valuenow="{{myTeamScore}}"
-				  aria-valuemin="0" aria-valuemax="100" style="width: {{(myTeamScore)}}%">
+				  <div class="progress-bar" role="progressbar" aria-valuenow="{{((myTeamScore/scoreToWin)*100)}}"
+				  aria-valuemin="0" aria-valuemax="100" style="width: {{((myTeamScore/scoreToWin)*100)}}%">
 				  </div>
 				</div>
 			</div>
