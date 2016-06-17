@@ -15,8 +15,8 @@ app.controller("orbController", function($scope, $http){
 	base.src = "img/base.png";
 // FOR AWS
 	// var apiPath = "http://orb-blitz.tristanlobaugh.com/";
-	// var apiPath = "http://localhost:3333/";
-	var apiPath = "http://tristanlobaugh.com:3333/";
+	var apiPath = "http://localhost:3333/api/";
+	// var apiPath = "http://tristanlobaugh.com:3333/";
 
 	var canvas = document.getElementById("the-canvas");
 	var context = canvas.getContext("2d");

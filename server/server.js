@@ -26,12 +26,11 @@ var clockInterval;
 var fps = 1000 / 60;
 
 
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use('/', routes);
-
-
+app.use('/api', routes);
 
 server.listen(process.env.port || 3333);
 console.log('server running on port 3333');
