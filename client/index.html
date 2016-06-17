@@ -287,14 +287,14 @@
 							<table class="table">
 								<thead>
 									<tr>
-										<th>Player Name</th>
-										<th>High Score</th>
-										<th>Most Orbs Abosrbed</th>
-										<th>Most Players Absorbed</th>
+										<th id="sort-stat-player" ng-click="statSort('playerName')" class="stat-header">Player Name</th>
+										<th id="sort-stat-score" ng-click="statSort('highScore')" class="stat-header stat-active">High Score</th>
+										<th id="sort-stat-orbs" ng-click="statSort('mostOrbs')" class="stat-header">Most Orbs Abosrbed</th>
+										<th id="sort-stat-players" ng-click="statSort('mostPlayers')" class="stat-header">Most Players Absorbed</th>
 									</tr>
 								</thead>
 								<tbody>
-									<tr ng-repeat="player in players|orderBy: '-highScore'|limitTo:10 track by $index">
+									<tr ng-repeat="player in players|orderBy: sortStatBy |limitTo:10 track by $index">
 										<td>{{player.playerName}}</td>
 										<td>{{player.highScore}}</td>
 										<td>{{player.mostOrbs}}</td>

@@ -26,6 +26,7 @@ app.controller("orbController", function($scope, $http){
 
 	$scope.score = 0;
 	$scope.sortOrder = "-score";
+	#scope.sortStatBy = "-highScore";
 	$scope.errorMessage = false;
 	$scope.sortTeams = false;
 	$scope.onTeam = false;
@@ -188,6 +189,8 @@ app.controller("orbController", function($scope, $http){
 			player: player
 		});
 		$scope.sortOrder = "-score";
+		$(".sort-option").removeClass("active");
+		$("#sort-score").addClass("active");
 		$scope.onTeam = false;
 		player.team = false;
 		player.inGame = false;
@@ -197,6 +200,8 @@ app.controller("orbController", function($scope, $http){
 
 	$scope.playAgain = function(){
 		$scope.sortOrder = "-score";
+		$(".sort-option").removeClass("active");
+		$("#sort-score").addClass("active");
 		$(".modal").modal("hide");
 		$("#spawnModal").modal("show");
 	}
@@ -292,6 +297,20 @@ app.controller("orbController", function($scope, $http){
 			}else if(sortItem == "playersAbsorbed"){
 				$("#sort-players").addClass("active");
 			}
+		}
+	}
+
+	$scope.statSort = function(sortItem){
+		$scope.sortStatBy = "-" + sortItem;
+		$(".stat-header").removeClass("stat-active");
+		if(sortItem == "playerName"){
+			$("#sort-stat-player").addClass("stat-active");
+		}else if(sortItem == "highScore"){
+			$("#sort-stat-score").addClass("stat-active");
+		}else if(sortItem == "mostOrbs"){
+			$("#sort-stat-orbs").addClass("stat-active");
+		}else if(sortItem == "mostPlayers"){
+			$("#sort-stat-players").addClass("stat-active");
 		}
 	}
 
