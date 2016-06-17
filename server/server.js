@@ -8,7 +8,7 @@ var players = [];
 var orbs = [];
 var bases = [];
 var scoreboard = [];
-var defaultSpeed = 6;
+var defaultSpeed = 3;
 var defaultSize = 8;
 var defaultzoom = 1.5;
 var defaultOrbs = 1000;
@@ -23,7 +23,7 @@ var routes = require('./routes/index');
 var bodyParser = require('body-parser');
 var tockInterval;
 var clockInterval;
-var fps = 1000 / 30;
+var fps = 1000 / 60;
 
 
 app.use(bodyParser.json());
@@ -316,10 +316,8 @@ io.sockets.on("connect", function(socket) {
                                     killedBy: player.name
                                 });
                                 player.radius += (players[k].radius * 0.25);
-                                if (player.zoom > 1) {
-
+                                if (player.zoom > 1){
                                     player.zoom -= (players[k].radius * 0.25) * 0.001;
-
                                 }
                                 if (players[k].team === false) {
                                     players.splice(k, 1);
@@ -384,11 +382,11 @@ io.sockets.on("connect", function(socket) {
                 bases[i].locX = (Math.floor(Math.random() * (worldWidth - 200)) + 100);
                 bases[i].locY = (Math.floor(Math.random() * (worldHeight - 200)) + 100);
                 bases[i].timeBeforeMove = (Math.floor(Math.random() * 60) + 60);
+                io.sockets.emit("bases", {
+		            bases: bases
+		        });
             }
         }
-        io.sockets.emit("bases", {
-            bases: bases
-        });
     }
 
     function win(winningTeam){

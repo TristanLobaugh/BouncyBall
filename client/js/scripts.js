@@ -10,12 +10,12 @@ app.controller("orbController", function($scope, $http){
 	var wWidth = $(window).width();
 	var tickInterval;
 	var leaderInterval;
-	var fps = 1000/30;
+	var fps = 1000/60;
 	var base = new Image();
 	base.src = "img/base.png";
 // FOR AWS
-	var apiPath = "http://orb-blitz.tristanlobaugh.com/";
-	// var apiPath = "http://localhost:3333/";
+	// var apiPath = "http://orb-blitz.tristanlobaugh.com/";
+	var apiPath = "http://localhost:3333/";
 
 	var canvas = document.getElementById("the-canvas");
 	var context = canvas.getContext("2d");
@@ -202,6 +202,11 @@ app.controller("orbController", function($scope, $http){
 		$scope.sortOrder = "-score";
 		$(".sort-option").removeClass("active");
 		$("#sort-score").addClass("active");
+		$(".modal").modal("hide");
+		$("#spawnModal").modal("show");
+	}
+
+	$scope.gotoStart = function(){
 		$(".modal").modal("hide");
 		$("#spawnModal").modal("show");
 	}

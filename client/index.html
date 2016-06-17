@@ -264,7 +264,7 @@
 							<div class="stats">Most Players Absorbed:</div><div class="stat-number">{{mostPlayersAbsorbed}}</div>
 						</div>
 						<div class="modal-footer">
-							<button type="button" ng-click="startGame()" class="btn play-button">Play Orb-Blitz!</button>
+							<button type="button" ng-click="gotoStart()" class="btn play-button">Back to Start Page!</button>
 							<div class="btn-wrapper">
 								<button id="playerStats-all-btn" type="button" ng-click="getAllStats()" class="btn stats-btn">See all stats</button>
 							</div>
@@ -278,7 +278,7 @@
 				<div class="modal-dialog modal-lg">
 
 				<!-- Modal content-->
-					<div class="modal-content">
+					<div id="all-stats-modal" class="modal-content">
 						<div class="modal-header">
 							<button type="button" class="close" data-dismiss="modal">&times;</button>
 							<h2 class="modal-title text-center">Orb-Blitz</h2>
@@ -305,7 +305,7 @@
 
 						</div>
 						<div class="modal-footer">
-							<button type="button" ng-click="startGame()" class="btn play-button">Play Orb-Blitz!</button>
+							<button type="button" ng-click="gotoStart()" class="btn play-button">Back to Start Page</button>
 							<div class="btn-wrapper">
 								<button id="playerStats-player-btn" type="button" ng-click="getPlayerStats()" class="btn stats-btn">See your stats</button>
 							</div>
