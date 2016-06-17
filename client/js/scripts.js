@@ -304,6 +304,7 @@ app.controller("orbController", function($scope, $http){
 		$scope.sortStatBy = "-" + sortItem;
 		$(".stat-header").removeClass("stat-active");
 		if(sortItem == "playerName"){
+			$scope.sortStatBy = sortItem;
 			$("#sort-stat-player").addClass("stat-active");
 		}else if(sortItem == "highScore"){
 			$("#sort-stat-score").addClass("stat-active");
